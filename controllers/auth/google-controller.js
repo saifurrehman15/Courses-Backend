@@ -1,4 +1,5 @@
 import sendResponse from "../../helper/response-sender.js";
+import googleService from "../../services/auth/google-service.js";
 import registerService from "../../services/auth/register.js";
 
 const googleAuthenticate = async (req, res) => {
@@ -8,11 +9,15 @@ const googleAuthenticate = async (req, res) => {
     }
 
     console.log(req.user);
-    
-    // const obj = registerService(req.user);
 
-    req.session.user = req.user;
-    res.redirect("http://localhost:4200/");
+    const obj = await googleService(req.user);
+    console.log("req=>", obj);
+
+    sendResponse(res, 201, {
+      error: false,
+      message: "User successfully login!",
+      data: { ...obj },
+    });
   } catch (error) {
     sendResponse(res, 500, {
       error: true,
@@ -22,7 +27,7 @@ const googleAuthenticate = async (req, res) => {
 };
 
 const logOut = async (req, res) => {
-  res.clearCookie("connect.sid");
+  res.clearCookie("_ga");
   req.session.destroy((err) => {
     if (err) {
       console.error("Error destroying session:", err);
@@ -32,7 +37,5 @@ const logOut = async (req, res) => {
     res.redirect("http://localhost:4200/");
   });
 };
-
-
 
 export { googleAuthenticate, logOut };

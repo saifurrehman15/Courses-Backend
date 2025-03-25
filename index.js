@@ -17,6 +17,7 @@ app.use(express.json());
 
 app.use(
   session({
+    name:"_ga",
     secret: process.env.AUTH_SECRET,
     resave: false,
     saveUninitialized: true,
