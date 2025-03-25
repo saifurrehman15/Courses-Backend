@@ -12,7 +12,7 @@ const googleAuthenticate = async (req, res) => {
     // const obj = registerService(req.user);
 
     req.session.user = req.user;
-    res.redirect("http://localhost:4200/");
+    res.redirect("http://localhost/saif/Camaro-Parts-Guru/report-a-problem.php/");
   } catch (error) {
     sendResponse(res, 500, {
       error: true,
