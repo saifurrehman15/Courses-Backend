@@ -9,6 +9,7 @@ const registerService = async (value) => {
 
   let hashedPassword = await bcrypt.hash(value.password, 10);
   value.password = hashedPassword;
+  value.provider = "credientials";
 
   let newUser = new userModel({ ...value });
   newUser = await newUser.save();

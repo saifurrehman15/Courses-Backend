@@ -9,7 +9,6 @@ const googleService = async (value) => {
 
   let obj = {
     email: value.emails[0].value,
-    password: "no-password",
     provider: "google",
   };
 
