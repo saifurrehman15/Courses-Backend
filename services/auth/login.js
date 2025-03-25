@@ -1,5 +1,5 @@
 import { userModel } from "../../db-models/user-schema.js";
-import jwt from "jsonwebtoken";
+import token from "../../helper/token-generate.js";
 
 const loginService = async (value) => {
   const userExist = await userModel.findOne({ email: value.email });
@@ -9,11 +9,7 @@ const loginService = async (value) => {
   let objWithoutPass = userExist.toObject();
   delete objWithoutPass.password;
 
-  let accessToken = jwt.sign({ ...objWithoutPass }, process.env.AUTH_SECRET, {
-    expiresIn: "2h",
-  });
-
-  let refreshToken = jwt.sign({ ...objWithoutPass }, process.env.AUTH_SECRET);
+  const { accessToken, refreshToken } = token(objWithoutPass);
 
   return { user: objWithoutPass, accessToken, refreshToken };
 };
