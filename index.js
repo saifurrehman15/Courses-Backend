@@ -9,7 +9,7 @@ import googleRoute from "./routes/auth-route/passport-routes.js"
 import session from 'express-session';
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 app.use(cors("*"));
 app.use(express.json());
