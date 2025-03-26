@@ -1,5 +1,5 @@
 import { userModel } from "../../db-models/user-schema.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import token from "../../helper/token-generate.js";
 
 const registerService = async (value) => {

@@ -18,13 +18,6 @@ router.get(
   googleAuthenticate
 );
 
-// router.get("/auth/session", (req, res) => {
-//   if (req.session.user) {
-//     res.json({ user: req.session.user });
-//   } else {
-//     res.status(401).json({ message: "No active session" });
-//   }
-// });
 
 router.get("/auth/logout", logOut);
 

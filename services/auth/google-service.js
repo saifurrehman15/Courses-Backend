@@ -1,5 +1,4 @@
 import { userModel } from "../../db-models/user-schema.js";
-import bcrypt from "bcrypt";
 import token from "../../helper/token-generate.js";
 
 const googleService = async (value) => {
