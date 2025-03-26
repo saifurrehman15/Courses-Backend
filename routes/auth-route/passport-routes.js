@@ -5,6 +5,7 @@ import {
   logOut,
 } from "../../controllers/auth/google-controller.js";
 
+
 const router = express.Router();
 
 router.get(
@@ -14,7 +15,7 @@ router.get(
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", { failureRedirect: "/" }),
   googleAuthenticate
 );
 

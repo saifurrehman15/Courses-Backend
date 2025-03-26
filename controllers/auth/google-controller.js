@@ -1,6 +1,5 @@
 import sendResponse from "../../helper/response-sender.js";
 import googleService from "../../services/auth/google-service.js";
-import registerService from "../../services/auth/register.js";
 
 const googleAuthenticate = async (req, res) => {
   try {

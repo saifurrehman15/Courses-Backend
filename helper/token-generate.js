@@ -6,7 +6,6 @@ const token =  (objForToken) => {
   });
 
   let refreshToken = jwt.sign({ ...objForToken }, process.env.AUTH_SECRET);
-console.log("func",{accessToken,refreshToken});
 
   return { accessToken, refreshToken };
 };

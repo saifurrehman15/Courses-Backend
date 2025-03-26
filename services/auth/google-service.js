@@ -2,7 +2,6 @@ import { userModel } from "../../db-models/user-schema.js";
 import token from "../../helper/token-generate.js";
 
 const googleService = async (value) => {
-  console.log(value.emails[0].value);
 
   const userExist = await userModel.findOne({ email: value.emails[0].value });
 
@@ -28,7 +27,7 @@ const googleService = async (value) => {
     
     let objWithoutPass = userExist.toObject();
     delete objWithoutPass.password;
-console.log(accessToken);
+    console.log(accessToken);
 
     return { user: objWithoutPass, accessToken, refreshToken };
   }
