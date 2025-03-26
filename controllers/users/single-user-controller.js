@@ -10,6 +10,8 @@ const findSingleUser = async (req, res) => {
       data: { user },
     });
   } catch (error) {
+    console.log("Hy");
+
     sendResponse(res, 500, {
       error: true,
       message: error || "Internal server error!",

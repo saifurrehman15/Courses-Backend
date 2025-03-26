@@ -4,14 +4,15 @@ import jwt from "jsonwebtoken";
 
 export const authenticateUser = async (req, res, next) => {
   try {
-    const token = req.header("Authorization").replace("Bearer ", "");
+    const tokenProvided = req.header("Authorization");
 
-    if (!token) {
+    if (!tokenProvided) {
       sendResponse(res, 400, {
         error: true,
         message: "Token is not provided!",
       });
     }
+    const token = tokenProvided.replace("Bearer ", "");
 
     let decoded = jwt.verify(token, process.env.AUTH_SECRET);
 
@@ -29,6 +30,8 @@ export const authenticateUser = async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.log("middleware", "Hy");
+
     sendResponse(res, 500, {
       error: true,
       message: error || "Internal server error!",
