@@ -10,7 +10,7 @@ const signUp = async (req, res) => {
       sendResponse(res, 400, { error: true, message: error.message });
     }
 
-    const obj =  registerService(value);
+    const obj = await registerService(value);
     console.log(obj);
 
     if (!obj) {
