@@ -3,7 +3,12 @@ import loginService from "../../services/auth/login.js";
 import { validateSchema } from "../../utils/validation-schemas/auth/user-validate.js";
 
 const login = async (req, res) => {
+
+  console.log('login')
+
+
   const { error, value } = validateSchema.validate(req.body);
+console.log(req,res);
 
   if (error) {
     sendResponse(res, 400, { error: true, message: error.message });
