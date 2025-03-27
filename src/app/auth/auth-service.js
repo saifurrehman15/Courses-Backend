@@ -28,14 +28,20 @@ const loginService = async (value) => {
   const userExist = await userModel.findOne({ email: value.email });
 
   if (!userExist) return null;
-  console.log(value.password,userExist);
-  
-  let checkPassword = await bcrypt.compare(value.password, userExist.password);
+  console.log(value.password, userExist);
 
-  if (!checkPassword) return null;
+  let checkPassword;
+
+  if (userExist.provider !== "google") {
+    checkPassword = await bcrypt.compare(value.password, userExist.password);
+    if (!checkPassword) return null;
+  }
 
   let objWithoutPass = userExist.toObject();
-  delete objWithoutPass.password;
+  objWithoutPass = objWithoutPass.password
+    ? delete objWithoutPass.password
+    : objWithoutPass;
+
   const { accessToken, refreshToken } = token(objWithoutPass);
 
   return { user: objWithoutPass, accessToken, refreshToken };
