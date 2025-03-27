@@ -1,8 +1,8 @@
-import { userModel } from "../db-models/user-schema.js";
+import { userModel } from "../user/user-schema.js";
 import sendResponse from "../helper/response-sender.js";
 import jwt from "jsonwebtoken";
 
-export const authenticateUser = async (req, res, next) => {
+const authenticateUser = async (req, res, next) => {
   try {
     const tokenProvided = req.header("Authorization");
 
@@ -38,3 +38,5 @@ export const authenticateUser = async (req, res, next) => {
     });
   }
 };
+
+export default authenticateUser;

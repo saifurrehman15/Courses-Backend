@@ -1,11 +1,10 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config.js";
-import connectDb from "./utils/db/db.js";
-import authRoute from "./routes/auth-route/auth-routes.js";
-import userRoute from "./routes/user-route/user-route.js";
-import passport from "./utils/passport-utils/passport-util.js";
-import googleRoute from "./routes/auth-route/passport-routes.js"
+import connectDb from "./src/utils/db/db.js";
+import authRoute from "./src/app/routes/auth-route/auth-routes.js";
+import userRoute from "./src/app/routes/user-route/user-route.js";
+import passport from "./src/utils/passport-utils/passport-util.js";
 import session from 'express-session';
 
 const app = express();
@@ -33,7 +32,6 @@ connectDb();
 
 app.use("/api", authRoute);
 app.use("/api", userRoute);
-app.use("/api", googleRoute);
 
 app.get("/", (req, res) => {
   res.send("Server is running on port " + port);

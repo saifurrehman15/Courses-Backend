@@ -1,4 +1,4 @@
-import sendResponse from "../../helper/response-sender.js";
+import sendResponse from "../helper/response-sender.js";
 
 const findSingleUser = async (req, res) => {
   try {
