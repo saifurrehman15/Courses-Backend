@@ -107,12 +107,13 @@ const refereshToken = (req, res) => {
   const getToken = refreshTokenService(user);
 
   if (!getToken) {
-    sendResponse(res, 403, { error: true, message: "Failed to mget token!" });
+    sendResponse(res, 403, { error: true, message: "Failed to get token!" });
   }
-  sendResponse(res, 204, {
-    error: true,
+
+  sendResponse(res, 200, {
+    error: false,
     message: "Token successfully refreshed",
-    getToken,
+    data:getToken,
   });
 };
 

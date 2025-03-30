@@ -81,7 +81,7 @@ const googleService = async (value) => {
 
 // referesh token service
 
-const refreshTokenService = async (value) => {
+const refreshTokenService =  (value) => {
   const { accessToken, refreshToken } = token(value);
   return { accessToken, refreshToken };
 };
