@@ -3,6 +3,7 @@ import {
   loginService,
   registerService,
   googleService,
+  refreshTokenService,
 } from "./auth-service.js";
 
 import { validateSchema } from "../user/user-validate.js";
@@ -98,4 +99,21 @@ const logOut = async (req, res) => {
   });
 };
 
-export { signUp, login, googleAuthenticate, logOut };
+// referesh token
+
+const refereshToken = (req, res) => {
+  const { user } = req;
+
+  const getToken = refreshTokenService(user);
+
+  if (!getToken) {
+    sendResponse(res, 403, { error: true, message: "Failed to mget token!" });
+  }
+  sendResponse(res, 204, {
+    error: true,
+    message: "Token successfully refreshed",
+    getToken,
+  });
+};
+
+export { signUp, login, googleAuthenticate, logOut,refereshToken };

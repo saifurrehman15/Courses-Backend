@@ -1,11 +1,13 @@
 import express from "express";
 import passport from "../../../utils/passport-utils/passport-util.js";
+import authenticateUser from "../../middlewares/authenticate-user.js";
 
 import {
   signUp,
   login,
   googleAuthenticate,
   logOut,
+  refereshToken,
 } from "../../auth/auth-controller.js";
 
 const router = express.Router();
@@ -31,5 +33,8 @@ router.get(
 
 // google logout
 router.get("/auth/logout", logOut);
+
+// referesh token
+router.get("/referesh-token", authenticateUser, refereshToken);
 
 export default router;

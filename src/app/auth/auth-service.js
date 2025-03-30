@@ -79,4 +79,11 @@ const googleService = async (value) => {
   }
 };
 
-export { registerService, loginService, googleService };
+// referesh token service
+
+const refreshTokenService = async (value) => {
+  const { accessToken, refreshToken } = token(value);
+  return { accessToken, refreshToken };
+};
+
+export { registerService, loginService, googleService, refreshTokenService };
