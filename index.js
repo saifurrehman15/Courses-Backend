@@ -8,7 +8,7 @@ import passport from "./src/utils/passport-utils/passport-util.js";
 import session from 'express-session';
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT;
 
 app.use(cors("*"));
 app.use(express.json());
