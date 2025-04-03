@@ -4,6 +4,7 @@ import "dotenv/config.js";
 import connectDb from "./src/utils/db/db.js";
 import authRoute from "./src/app/routes/auth-route/auth-routes.js";
 import userRoute from "./src/app/routes/user-route/user-route.js";
+import courseRoute from "./src/app/routes/course/index.js";
 import passport from "./src/utils/passport-utils/passport-util.js";
 import session from 'express-session';
 
@@ -32,6 +33,7 @@ connectDb();
 
 app.use("/api", authRoute);
 app.use("/api", userRoute);
+app.use("/api", courseRoute);
 
 app.get("/", (req, res) => {
   res.send("Server is running on port " + port);
