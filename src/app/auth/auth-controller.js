@@ -6,6 +6,7 @@ import {
 } from "./auth-service.js";
 
 import { validateSchema } from "../user/user-validate.js";
+import token from "../helper/token-generate.js";
 
 // register controller
 const signUp = async (req, res) => {
@@ -98,4 +99,23 @@ const logOut = async (req, res) => {
   });
 };
 
-export { signUp, login, googleAuthenticate, logOut };
+// referesh token
+
+const refereshToken = (req, res) => {
+  console.log("user==>", req.user);
+
+  let getToken = token(req.user);
+  let { accessToken, refreshToken } = getToken;
+
+  if (!req.user) {
+    sendResponse(res, 403, { error: true, message: "Failed to get token!" });
+  }
+
+  sendResponse(res, 200, {
+    error: false,
+    message: "Token successfully refreshed",
+    data: { accessToken, refreshToken },
+  });
+};
+
+export { signUp, login, googleAuthenticate, logOut, refereshToken };

@@ -37,9 +37,8 @@ const loginService = async (value) => {
   }
 
   let objWithoutPass = userExist.toObject();
-  objWithoutPass = objWithoutPass.password
-    ? delete objWithoutPass.password
-    : objWithoutPass;
+  delete objWithoutPass.password;
+
 
   const { accessToken, refreshToken } = token(objWithoutPass);
 
@@ -77,5 +76,7 @@ const googleService = async (value) => {
     return { user: objWithoutPass, accessToken, refreshToken };
   }
 };
+
+// referesh token service
 
 export { registerService, loginService, googleService };

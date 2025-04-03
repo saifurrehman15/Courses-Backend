@@ -12,6 +12,7 @@ const authenticateUser = async (req, res, next) => {
         message: "Token is not provided!",
       });
     }
+
     const token = tokenProvided.replace("Bearer ", "");
 
     let decoded = jwt.verify(token, process.env.AUTH_SECRET);
@@ -19,9 +20,11 @@ const authenticateUser = async (req, res, next) => {
     if (!decoded) {
       sendResponse(res, 403, { error: true, message: "Token is expired!" });
     }
+
     console.log("decoded=>", decoded);
 
-    const findUser = await userModel.findById(decoded._id);
+    const findUser = await userModel.findById(decoded._id).lean();
+    
     if (!findUser) {
       sendResponse(res, 404, { error: true, message: "User not found!" });
     }
