@@ -49,7 +49,7 @@ class CoursesController {
             sendResponse(res, 201, {
                 error: false,
                 message: "Course created successfully!",
-                data: { course }
+                data: { ...course }
             });
         }
         catch (err) {
