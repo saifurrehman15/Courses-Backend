@@ -28,7 +28,6 @@ const loginService = async (value) => {
   const userExist = await userModel.findOne({ email: value.email });
 
   if (!userExist) return null;
-  console.log(value.password, userExist);
 
   let checkPassword;
 
