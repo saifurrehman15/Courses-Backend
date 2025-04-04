@@ -16,7 +16,10 @@ router.delete("/courses/:id", [authenticateUser, hasAccess ] ,coursesController.
 
 
 router.get("/courses/:id/items", coursesItemsController.index)
-router.post("/courses/:id/items", coursesItemsController.create)
+router.post("/courses/:id/items", [ authenticateUser, hasAccess ], coursesItemsController.create)
+router.get("/courses/:id/items/:id", coursesItemsController.show)
+router.put("/courses/:id/items/:id", [ authenticateUser, hasAccess ], coursesItemsController.update)
+router.delete("/courses/:id/items/:id", [ authenticateUser, hasAccess ], coursesItemsController.delete)
 
 
 

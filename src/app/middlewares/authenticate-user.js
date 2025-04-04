@@ -21,7 +21,6 @@ const authenticateUser = async (req, res, next) => {
       sendResponse(res, 403, { error: true, message: "Token is expired!" });
     }
 
-    console.log("decoded=>", decoded);
 
     const findUser = await userModel.findById(decoded._id).lean();
     
@@ -33,7 +32,6 @@ const authenticateUser = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log("middleware", "Hy");
 
     sendResponse(res, 500, {
       error: true,
