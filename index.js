@@ -8,6 +8,7 @@ import courseRoute from "./src/app/routes/course/index.js";
 import passport from "./src/utils/passport-utils/passport-util.js";
 import session from 'express-session';
 
+
 const app = express();
 const port = process.env.PORT;
 
@@ -40,3 +41,4 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => console.log("Server running on port " + port));
+

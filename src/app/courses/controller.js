@@ -1,10 +1,11 @@
 import { courseModel } from "./schema.js";
 import sendResponse from "../helper/response-sender.js";
 import { validateSchema } from "./validate.js";
+import { courseService } from "./services.js";
 class CoursesController {
     async index(req, res) {
         try {
-            const courses = await courseModel.find();
+            const courses = await courseService.find();
             sendResponse(res, 200, {
                 error: false,
                 message: "Courses fetched successfully!",
@@ -21,7 +22,7 @@ class CoursesController {
 
     async show (req, res) {
         try {
-            const course = await courseModel.findById(req.params.id);
+            const course = await courseService.findById({ id: req.params.id });
             sendResponse(res, 200, {
                 error: false,
                 message: "Course fetched successfully!",
@@ -38,14 +39,7 @@ class CoursesController {
 
     async create(req, res) {
         try {
-
-            const { error, value } = validateSchema.validate(req.body); 
-
-            if (error) {
-                sendResponse(res, 400, { error: true, message: error.message });
-            }
-
-            const course = await courseModel.create(value);
+            const course = await courseService.create({body: req.body, user: req.user});
             sendResponse(res, 201, {
                 error: false,
                 message: "Course created successfully!",
@@ -62,7 +56,7 @@ class CoursesController {
 
     async update(req, res) {
         try {
-            const course = await courseModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            const course = await courseService.update({id: req.params.id, body: req.body});
             sendResponse(res, 200, {
                 error: false,
                 message: "Course updated successfully!",
@@ -79,11 +73,10 @@ class CoursesController {
 
     async delete(req, res) {
         try {
-            const course = await courseModel.findByIdAndDelete(req.params.id);
+            const course = await courseService.delete({ id: req.params.id });
             sendResponse(res, 200, {
                 error: false,
                 message: "Course deleted successfully!",
-                data: { course }
             });
         }
         catch (err) {
@@ -93,7 +86,6 @@ class CoursesController {
             });
         }
     }
-
 }
 
 export const coursesController = new CoursesController(); 
