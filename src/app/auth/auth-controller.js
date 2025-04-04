@@ -18,7 +18,6 @@ const signUp = async (req, res) => {
     }
 
     const obj = await registerService(value);
-    console.log(obj);
 
     if (!obj) {
       sendResponse(res, 403, { error: true, message: "User already exist!" });
@@ -39,10 +38,8 @@ const signUp = async (req, res) => {
 
 // login controller
 const login = async (req, res) => {
-  console.log("login");
 
   const { error, value } = validateSchema.validate(req.body);
-  console.log(req, res);
 
   if (error) {
     sendResponse(res, 400, { error: true, message: error.message });
@@ -68,10 +65,8 @@ const googleAuthenticate = async (req, res) => {
       sendResponse(res, 401, { error: true, message: "Authentication failed" });
     }
 
-    console.log(req.user);
 
     const obj = await googleService(req.user);
-    console.log("req=>", obj);
 
     sendResponse(res, 201, {
       error: false,
@@ -102,7 +97,6 @@ const logOut = async (req, res) => {
 // referesh token
 
 const refereshToken = (req, res) => {
-  console.log("user==>", req.user);
 
   let getToken = token(req.user);
   let { accessToken, refreshToken } = getToken;
