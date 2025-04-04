@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
-const CourseSchema = new Schema(
+const CourseItemSchema = new Schema(
     {
         title: { type: String, required: true },
         description: { type: String, required: true },
@@ -12,12 +12,11 @@ const CourseSchema = new Schema(
         // level: { type: String, required: true },
         // language: { type: String, required: true },
         // students: { type: Number, required: true },
-        user: { type: mongoose.Types.ObjectId, required: true, ref: "users" },
+        course: { type: mongoose.Types.ObjectId, required: true, ref: "courses" },
     }
     ,
     {
         timestamps: true,
     }
 );
-export const courseModel = mongoose.models.courses || mongoose.model("courses", CourseSchema); 
-
+export const courseItemModel = mongoose.models.courses_items || mongoose.model("courses_items", CourseItemSchema);
