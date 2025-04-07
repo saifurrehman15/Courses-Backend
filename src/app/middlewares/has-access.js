@@ -1,9 +1,5 @@
-import { userModel } from "../user/user-schema.js";
 import sendResponse from "../helper/response-sender.js";
-import jwt from "jsonwebtoken";
-import { setDriver } from "mongoose";
 import { courseService } from "../courses/services.js";
-
 import { instituteService } from "../institute/services.js";
 
 const hasAccess = async (req, res, next) => {
