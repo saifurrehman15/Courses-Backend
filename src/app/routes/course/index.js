@@ -2,7 +2,6 @@ import express from "express";
 import { coursesController } from "../../courses/controller.js";
 import authenticateUser from "../../middlewares/authenticate-user.js";
 import hasAccess from "../../middlewares/has-access.js";
-import expressListEndpoints from 'express-list-endpoints';
 import { coursesItemsController } from "../../courses/items/controller.js";
 
 
