@@ -35,7 +35,7 @@ const hasAccess = async (req, res, next) => {
       } else {
         sendResponse(res, 400, {
           error: true,
-          message: "You don't have access to this course!",
+          message: "You don't have access to this institute!",
         });
       }
     }
