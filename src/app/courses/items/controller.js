@@ -1,29 +1,35 @@
 import sendResponse from "../../helper/response-sender.js";
 import { courseModel } from "../schema.js";
+
 import { courseService } from "../services.js";
 import { courseItemModel } from "./schema.js";
 import { courseItemsService } from "./services.js";
+
 import { validateSchema } from "./validate.js";
 
 
 class CoursesItemsController  {
 
     async index(req, res) {
+
       const { limit = 10 , page = 1, search = null } = req.query;
         try {
           const courseId = req.params.id;
           const courseExists = await courseService.findById({ id: courseId});
+
           if (!courseExists) {
             return sendResponse(res, 404, {
               error: true,
               message: "Course not found!",
             });
           } 
+
           const courseItems = await courseItemsService.find({ courseId : courseId, page: page, limit: Number(limit), search: search });
           sendResponse(res, 200, {
             error: false,
             message: "Course items fetched successfully!",
             data: { course: courseExists, courseItems },
+
           });
         } catch (err) {
           sendResponse(res, 500, {
@@ -61,6 +67,7 @@ class CoursesItemsController  {
             });
             }
       }
+
 
       async show(req, res) {
         try {

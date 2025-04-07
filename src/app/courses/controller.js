@@ -7,6 +7,7 @@ class CoursesController {
         const { limit = 10 , page = 1, search = null } = req.query;
         try {
             const courses = await courseService.find({ page: page, limit: Number(limit), search: search });
+
             sendResponse(res, 200, {
                 error: false,
                 message: "Courses fetched successfully!",
