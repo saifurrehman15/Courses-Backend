@@ -1,6 +1,6 @@
-import sendResponse from "../helper/response-sender";
-import { studentServices } from "./services";
-import { validateSchema } from "./validate";
+import sendResponse from "../helper/response-sender.js";
+import { studentServices } from "./services.js";
+import { validateSchema } from "./validate.js";
 
 class StudentController {
   async create(req, res) {
@@ -14,6 +14,19 @@ class StudentController {
     }
 
     const service = await studentServices.create({ value, user: req.user });
+
+    if (service.error) {
+      sendResponse(res, 403, {
+        error: true,
+        message: service.error,
+      });
+    }
+
+    sendResponse(res, 201, {
+      error: false,
+      message: "successfully applied to this institute!",
+      data: { result: service },
+    });
   }
 
   async findAll(req, res) {}

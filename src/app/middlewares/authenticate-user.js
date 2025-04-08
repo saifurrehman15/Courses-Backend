@@ -2,7 +2,7 @@ import { userModel } from "../user/user-schema.js";
 import sendResponse from "../helper/response-sender.js";
 import jwt from "jsonwebtoken";
 
-const c = async (req, res, next) => {
+const authenticateUser = async (req, res, next) => {
   try {
     const tokenProvided = req.header("Authorization");
 

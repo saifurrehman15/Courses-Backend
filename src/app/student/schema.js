@@ -14,9 +14,15 @@ const StudentSchema = new Schema(
       ref: "institute",
       required: true,
     },
+    status: {
+      type: String,
+      default: "pending",
+      enums: ["pending", "approved", "rejected"],
+    },
   },
   { timestamps: true }
 );
 
 export const studentModal =
-  mongoose.models.students || mongoose.model("students", StudentSchema);
+  mongoose.models.students_appicants ||
+  mongoose.model("students_appicants", StudentSchema);
