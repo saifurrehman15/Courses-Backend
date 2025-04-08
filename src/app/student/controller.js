@@ -4,29 +4,37 @@ import { validateSchema } from "./validate.js";
 
 class StudentController {
   async create(req, res) {
-    const { error, value } = validateSchema.validate(req.body);
+    try {
+      const { error, value } = validateSchema.validate(req.body);
 
-    if (error) {
-      sendResponse(res, 401, {
-        error: true,
-        message: error.message,
+      if (error) {
+        sendResponse(res, 401, {
+          error: true,
+          message: error.message,
+        });
+      }
+
+      const service = await studentServices.create({ value, user: req.user });
+
+      if (service.error) {
+        sendResponse(res, 403, {
+          error: true,
+          message: service.error,
+        });
+      }
+
+      sendResponse(res, 201, {
+        error: false,
+        message: "successfully applied to this institute!",
+        data: { result: service },
+      });
+    } catch (error) {
+      sendResponse(res, 500, {
+        error: false,
+        message: "successfully applied to this institute!",
+        data: { result: service },
       });
     }
-
-    const service = await studentServices.create({ value, user: req.user });
-
-    if (service.error) {
-      sendResponse(res, 403, {
-        error: true,
-        message: service.error,
-      });
-    }
-
-    sendResponse(res, 201, {
-      error: false,
-      message: "successfully applied to this institute!",
-      data: { result: service },
-    });
   }
 
   async findAll(req, res) {}

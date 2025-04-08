@@ -13,13 +13,9 @@ class StudentService {
     let institute = await instituteModal.findOne({ _id: value.institute });
 
     institute = institute.toObject().duration.split(" ");
-    console.log(institute);
 
     let durationNumber = Number(institute[0]);
     let inMYD = institute[1].toLowerCase();
-    console.log(inMYD);
-
-    console.log(institute[0]);
 
     const validUnits = ["months", "month", "year", "years"];
 
@@ -27,12 +23,12 @@ class StudentService {
       return console.error("Invalid unit in duration.");
     }
 
-    const threeMonthsAgo = dayjs().subtract(durationNumber, inMYD);
-    let daysLeft = dayjs().diff(threeMonthsAgo, "days");
+    const monthsAgo = dayjs().subtract(durationNumber, inMYD);
+    let daysLeft = dayjs().diff(monthsAgo, "days");
 
     if (
       (alreadyApplied?.createdAt &&
-        dayjs(alreadyApplied.createdAt).isBefore(threeMonthsAgo)) ||
+        dayjs(alreadyApplied.createdAt).isBefore(monthsAgo)) ||
       !alreadyApplied ||
       (alreadyApplied.status == "pending" &&
         alreadyApplied.institute.toString() &&
