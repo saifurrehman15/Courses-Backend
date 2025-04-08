@@ -1,46 +1,22 @@
+import { dbQueries } from "../../utils/db/queries.js";
 import sendResponse from "../helper/response-sender.js";
 import { courseModel } from "./schema.js";
 import { validateSchema } from "./validate.js";
 class CourseService {
-  
   async find({ page, limit, search }) {
     const skip = (page - 1) * limit;
     const matchStage = search
       ? {
-          $match: {
-            $or: [
-              { title: { $regex: search, $options: "i" } },
-              { description: { $regex: search, $options: "i" } },
-            ],
-          },
+          $or: [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ],
         }
-      : {
-          $match: {},
-        };
-    return await courseModel.aggregate([
-      matchStage,
-      {
-        $facet: {
-          metadata: [{ $count: "total" }],
-          data: [{ $skip: skip }, { $limit: limit }],
-        },
-      },
-      {
-        $project: {
-          courses: "$data",
-          pagination: {
-            total: { $arrayElemAt: ["$metadata.total", 0] },
-            page: { $literal: page },
-            limit: { $literal: limit },
-            totalPages: {
-              $ceil: {
-                $divide: [{ $arrayElemAt: ["$metadata.total", 0] }, limit],
-              },
-            },
-          },
-        },
-      },
-    ]);
+      : {};
+      
+    return await courseModel.aggregate(
+      dbQueries.paginationQuery(matchStage, "courses", skip, limit, page)
+    );
   }
 
   async findById({ id }) {
@@ -69,4 +45,3 @@ class CourseService {
 }
 
 export const courseService = new CourseService();
-

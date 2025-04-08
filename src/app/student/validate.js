@@ -10,7 +10,18 @@ const validateSchema = Joi.object({
     .pattern(/^\d{5}-\d{7}-\d{1}$/)
     .required(),
   institute: Joi.string().required(),
-  status: Joi.string().default("pending"),
+  status: Joi.string()
+    .valid("pending", "approved", "reject")
+    .default("pending"),
 });
 
-export { validateSchema };
+const validateUpdate = Joi.object({
+  studentCnic: Joi.string().forbidden(),
+  appliedBy: Joi.string().forbidden(),
+  phone: Joi.string().forbidden(),
+  status: Joi.string()
+    .valid("pending", "approved", "reject")
+    .default("pending"),
+});
+
+export { validateSchema, validateUpdate };

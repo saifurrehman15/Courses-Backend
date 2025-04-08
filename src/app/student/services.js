@@ -1,3 +1,4 @@
+import { dbQueries } from "../../utils/db/queries.js";
 import { instituteModal } from "../institute/schema.js";
 import { studentModal } from "./schema.js";
 import dayjs from "dayjs";
@@ -40,13 +41,52 @@ class StudentService {
     }
   }
 
-  async findAll() {}
+  async findAll(queries) {
+    const { search, limits = 5, page = 1 } = queries;
+    let limitsInNumber = Number(limits);
+    let skipsOffset = (page - 1) * limitsInNumber;
 
-  async findOne() {}
+    let query = {};
+    console.log("search", queries.search);
 
-  async update() {}
+    if (search) {
+      query = {
+        $or: [
+          {
+            instituteName: { $regex: queries.search, $options: "i" },
+          },
+          { instituteAddress: { $regex: queries.search, $options: "i" } },
+        ],
+      };
+    }
 
-  async delete() {}
+    return await studentModal.aggregate(
+      dbQueries.paginationQuery(
+        query,
+        "applications",
+        skipsOffset,
+        limitsInNumber,
+        page
+      )
+    );
+    
+  }
+
+  async findOne(id) {
+    return await studentModal.findById(id);
+  }
+
+  async findOwnApplication(id) {
+    return await studentModal.find({ appliedBy: id });
+  }
+
+  async update({ id, value }) {
+    return studentModal.findByIdAndUpdate(id, value);
+  }
+
+  async delete(id) {
+    return studentModal.findByIdAndDelete(id);
+  }
 }
 
 export const studentServices = new StudentService();

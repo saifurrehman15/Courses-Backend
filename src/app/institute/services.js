@@ -1,3 +1,4 @@
+import { dbQueries } from "../../utils/db/queries.js";
 import { instituteModal } from "./schema.js";
 
 class InstituteServices {
@@ -29,35 +30,15 @@ class InstituteServices {
     }
     console.log(query);
 
-    return await instituteModal.aggregate([
-      {
-        $match: query,
-      },
-      {
-        $facet: {
-          metadata: [{ $count: "total" }],
-          institutes: [{ $skip: skipsOffset }, { $limit: limitsInNumber }],
-        },
-      },
-      {
-        $project: {
-          institutes: "$institutes",
-          pagination: {
-            total: { $arrayElemAt: ["$metadata.total", 0] },
-            page: { $literal: page },
-            limit: { $literal: limitsInNumber },
-            totalPages: {
-              $ceil: {
-                $divide: [
-                  { $arrayElemAt: ["$metadata.total", 0] },
-                  limitsInNumber,
-                ],
-              },
-            },
-          },
-        },
-      },
-    ]);
+    return await instituteModal.aggregate(
+      dbQueries.paginationQuery(
+        query,
+        "institutes",
+        skipsOffset,
+        limitsInNumber,
+        page
+      )
+    );
   }
 
   async findOne(query) {

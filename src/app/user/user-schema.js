@@ -6,9 +6,9 @@ const UserSchema = new Schema(
   {
     // userName: { type: String, required: true },
     email: { type: String, required: true },
-    password: String,
+    password: { type: String, required: true },
     role: { type: String, default: "user" },
-    provider: String,
+    provider: { tpye: String, default: "crediential" },
   },
   { timestamps: true }
 );
