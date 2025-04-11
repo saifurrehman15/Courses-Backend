@@ -16,31 +16,6 @@ class StudentService {
       return { error: "The institute in which you are applying is not found!" };
     }
 
-    const alreadyStudying = user?.institute?.duration;
-    console.log(alreadyStudying);
-
-    const [durationNumber, inMYD] =
-      alreadyStudying.trim().split(" ") ||
-      institute.toObject().duration.trim().split(" ");
-    console.log("format=>", durationNumber, "format=>", inMYD);
-
-    let parseDuration = Number(durationNumber);
-    let inMYDLowerCase = inMYD.toLowerCase();
-
-    const validUnits = ["months", "month", "year", "years"];
-
-    if (!validUnits.includes(inMYDLowerCase)) {
-      return {
-        error: "Invalid unit in duration.It should like `3 months`",
-        status: 400,
-      };
-    }
-
-    const monthsAgo = dayjs().subtract(parseDuration, inMYDLowerCase);
-    let daysLeft = dayjs().diff(monthsAgo, "days");
-
-    const condition1 = daysLeft == 0;
-
     const condition2 =
       alreadyApplied?.status == "pending" &&
       value.institute !== alreadyApplied?.institute.toString();
@@ -48,11 +23,7 @@ class StudentService {
     const condition3 =
       alreadyApplied && value.institute == alreadyApplied?.institute.toString();
 
-    if (user?.institute && !condition1) {
-      return { error: `You can apply after ${daysLeft} days!`, status: 403 };
-    }
-
-    if (!alreadyApplied || condition1 || condition2) {
+    if (!alreadyApplied || condition2) {
       return await studentModal.create({ ...value, appliedBy: user._id });
     } else if (condition3) {
       return {

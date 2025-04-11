@@ -2,10 +2,11 @@ import express from "express";
 import { studentController } from "../../student/controller.js";
 import authenticateUser from "../../middlewares/authenticate-user.js";
 import hasAccess from "../../middlewares/has-access.js";
+import trackDuration from "../../middlewares/duration-track.js";
 
 const router = express.Router();
 
-router.post("/student-application", authenticateUser, studentController.create);
+router.post("/student-application", [authenticateUser,trackDuration], studentController.create);
 router.get("/all-application", authenticateUser, studentController.findAll);
 router.get(
   "/single-application/:id",
