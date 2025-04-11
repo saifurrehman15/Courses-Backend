@@ -19,13 +19,13 @@ router.get(
 );
 router.put(
   "/update-application/:id",
-  [authenticateUser, hasAccess],
-  studentController.findOne
+  authenticateUser,
+  studentController.update
 );
 router.delete(
   "/delete-application/:id",
   [authenticateUser, hasAccess],
-  studentController.findOne
+  studentController.delete
 );
 
 export default router;

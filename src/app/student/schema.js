@@ -17,7 +17,7 @@ const StudentSchema = new Schema(
     status: {
       type: String,
       default: "pending",
-      enums: ["pending", "approved", "rejected"],
+      enums: ["pending", "approved", "rejected", "expired"],
     },
   },
   { timestamps: true }

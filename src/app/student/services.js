@@ -1,5 +1,6 @@
 import { dbQueries } from "../../utils/db/queries.js";
 import { instituteModal } from "../institute/schema.js";
+import { userModel } from "../user/user-schema.js";
 import { studentModal } from "./schema.js";
 import dayjs from "dayjs";
 
@@ -8,36 +9,56 @@ class StudentService {
     let alreadyApplied = await studentModal.findOne({
       institute: value.institute,
       appliedBy: user._id,
-      status: "pending",
     });
 
     let institute = await instituteModal.findOne({ _id: value.institute });
+    if (!institute) {
+      return { error: "The institute in which you are applying is not found!" };
+    }
 
-    institute = institute.toObject().duration.split(" ");
+    const [durationNumber, inMYD] = institute
+      .toObject()
+      .duration.trim()
+      .split(" ");
 
-    let durationNumber = Number(institute[0]);
-    let inMYD = institute[1].toLowerCase();
+    let parseDuration = Number(durationNumber);
+    let inMYDLowerCase = inMYD.toLowerCase();
 
     const validUnits = ["months", "month", "year", "years"];
 
-    if (!validUnits.includes(inMYD)) {
-      return console.error("Invalid unit in duration.");
+    if (!validUnits.includes(inMYDLowerCase)) {
+      return {
+        error: "Invalid unit in duration.It should like `3 months`",
+        status: 400,
+      };
     }
+    const alreadyStudying = user?.institute?.admissionAt;
+    console.log(alreadyStudying);
 
-    const monthsAgo = dayjs().subtract(durationNumber, inMYD);
+    const monthsAgo = dayjs().subtract(parseDuration, inMYDLowerCase);
     let daysLeft = dayjs().diff(monthsAgo, "days");
 
-    if (
-      (alreadyApplied?.createdAt &&
-        dayjs(alreadyApplied.createdAt).isBefore(monthsAgo)) ||
-      !alreadyApplied ||
-      (alreadyApplied.status == "pending" &&
-        alreadyApplied.institute.toString() &&
-        value.institute !== alreadyApplied?.institute.toString())
-    ) {
+    const condition1 =
+      alreadyApplied && dayjs(user?.institute?.admissionAt).isBefore(monthsAgo);
+
+    const condition2 =
+      alreadyApplied?.status == "pending" &&
+      value.institute !== alreadyApplied?.institute.toString();
+
+    const condition3 =
+      alreadyApplied && value.institute == alreadyApplied?.institute.toString();
+
+    if (user?.institute && !condition1) {
+      return { error: `You can apply after ${daysLeft} days!`, status: 403 };
+    }
+
+    if (!alreadyApplied || condition1 || condition2) {
       return await studentModal.create({ ...value, appliedBy: user._id });
-    } else {
-      return { error: `You can apply after ${daysLeft} days!` };
+    } else if (condition3) {
+      return {
+        error: `You have already applied to this institute please wait until they approve your application!`,
+        status: 400,
+      };
     }
   }
 
@@ -69,7 +90,6 @@ class StudentService {
         page
       )
     );
-    
   }
 
   async findOne(id) {
@@ -80,8 +100,38 @@ class StudentService {
     return await studentModal.find({ appliedBy: id });
   }
 
-  async update({ id, value }) {
-    return studentModal.findByIdAndUpdate(id, value);
+  async update({ id, value, user }) {
+    
+      const updated = await studentModal
+  .findByIdAndUpdate(id, value, { new: true })
+  
+
+
+    console.log(updated);
+
+    if (!updated) {
+      return { error: "Student application not found", status: 404 };
+    }
+
+    await studentModal.updateMany(
+      {
+        appliedBy: user._id,
+        status: "pending",
+      },
+      { $set: { status: "expired" } }
+    );
+    
+    let data = await userModel.findByIdAndUpdate(user._id, {
+      $set: {
+        institute: {
+          instituteId: updated.institute,
+          duration: updated.status,
+        },
+      },
+    });
+    console.log(data);
+
+    return updated;
   }
 
   async delete(id) {

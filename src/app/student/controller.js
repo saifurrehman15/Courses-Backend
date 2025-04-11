@@ -13,11 +13,13 @@ class StudentController {
           message: error.message,
         });
       }
+      console.log(req.body, req.user);
 
       const service = await studentServices.create({ value, user: req.user });
+      console.log("hello", service);
 
       if (service.error) {
-        sendResponse(res, 403, {
+        sendResponse(res, service.status, {
           error: true,
           message: service.error,
         });
@@ -29,10 +31,11 @@ class StudentController {
         data: { result: service },
       });
     } catch (error) {
+      console.log(error);
+
       sendResponse(res, 500, {
-        error: false,
-        message: "successfully applied to this institute!",
-        data: { result: service },
+        error: true,
+        message: "Internal server error!" || error,
       });
     }
   }
@@ -119,7 +122,9 @@ class StudentController {
       const service = await studentServices.update({
         id: req.params.id,
         value,
+        user: req.user,
       });
+      console.log(req.params.id,service);
 
       if (!service) {
         sendResponse(res, 401, {
@@ -136,7 +141,7 @@ class StudentController {
     } catch (error) {
       sendResponse(res, 500, {
         error: true,
-        message: error || "Internal server error!",
+        message: "Internal server error!" || error,
       });
     }
   }
