@@ -20,8 +20,9 @@ class StudentService {
     console.log(alreadyStudying);
 
     const [durationNumber, inMYD] =
-      alreadyStudying.trim().split(" ") || institute.toObject().duration.trim().split(" ");
-console.log("format=>",durationNumber,"format=>",inMYD);
+      alreadyStudying.trim().split(" ") ||
+      institute.toObject().duration.trim().split(" ");
+    console.log("format=>", durationNumber, "format=>", inMYD);
 
     let parseDuration = Number(durationNumber);
     let inMYDLowerCase = inMYD.toLowerCase();
@@ -38,8 +39,7 @@ console.log("format=>",durationNumber,"format=>",inMYD);
     const monthsAgo = dayjs().subtract(parseDuration, inMYDLowerCase);
     let daysLeft = dayjs().diff(monthsAgo, "days");
 
-    const condition1 =
-      alreadyApplied && dayjs(parseDuration).isBefore(monthsAgo);
+    const condition1 = daysLeft == 0;
 
     const condition2 =
       alreadyApplied?.status == "pending" &&
