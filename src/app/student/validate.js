@@ -11,7 +11,7 @@ const validateSchema = Joi.object({
     .required(),
   institute: Joi.string().required(),
   status: Joi.string()
-    .valid("pending", "approved", "reject")
+    .valid("pending", "approved", "rejected", "expired", "completed")
     .default("pending"),
 });
 
@@ -19,8 +19,9 @@ const validateUpdate = Joi.object({
   studentCnic: Joi.string().forbidden(),
   appliedBy: Joi.string().forbidden(),
   phone: Joi.string().forbidden(),
+  institute: Joi.string().forbidden(),
   status: Joi.string()
-    .valid("pending", "approved", "reject")
+    .valid("pending", "approved", "rejected", "expired", "completed")
     .default("pending"),
 });
 

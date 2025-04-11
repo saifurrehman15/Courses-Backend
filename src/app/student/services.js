@@ -63,8 +63,8 @@ class StudentService {
     );
   }
 
-  async findOne(id) {
-    return await studentModal.findById(id);
+  async findOne(queries) {
+    return await studentModal.findOne(queries);
   }
 
   async findOwnApplication(id) {
@@ -72,17 +72,18 @@ class StudentService {
   }
 
   async update({ id, value, user }) {
+    const findApplication = await studentModal.findById(id);
+
+    if (!findApplication) {
+      return { error: "Student application not found", status: 404 };
+    } else if (findApplication.status === "expired") {
+      return { error: "This application is expired!", status: 403 };
+    }
     const updated = await studentModal.findByIdAndUpdate(id, value, {
       new: true,
     });
-
-    const ins = await instituteModal.findById(updated.institute);
-
-    console.log(ins);
-
-    if (!updated) {
-      return { error: "Student application not found", status: 404 };
-    }
+    let ins = await instituteModal.findById(updated.institute);
+    ins = ins?.toObject();
 
     await studentModal.updateMany(
       {
@@ -96,8 +97,10 @@ class StudentService {
       user._id,
       {
         $set: {
-          "institute.duration": "6 months",
-          "institute.instituteId": updated.institute,
+          institute: {
+            duration: ins.duration,
+            instituteId: updated.institute,
+          },
         },
       },
       { new: true }
@@ -109,7 +112,9 @@ class StudentService {
   }
 
   async delete(id) {
-    return studentModal.findByIdAndDelete(id);
+    const deleted = await studentModal.findByIdAndDelete(id);
+
+    return deleted;
   }
 }
 

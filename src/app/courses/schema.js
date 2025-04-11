@@ -12,7 +12,7 @@ const CourseSchema = new Schema(
         // level: { type: String, required: true },
         // language: { type: String, required: true },
         // students: { type: Number, required: true },
-        user: { type: mongoose.Types.ObjectId, required: true, ref: "users" },
+        createdBy: { type: mongoose.Types.ObjectId, required: true, ref: "institutes" },
     }
     ,
     {

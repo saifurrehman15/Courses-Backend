@@ -71,19 +71,19 @@ class InstituteController {
       const institute = await instituteService.findOne({ _id: req.params.id });
 
       if (!institute) {
-        sendResponse(res, 404, {
+        return sendResponse(res, 404, {
           error: true,
           message: "Institute not found!",
         });
       }
 
-      sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: false,
         message: "Institute fetched successfully!",
         data: { ...institute },
       });
     } catch (err) {
-      sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: true,
         message: err,
       });
@@ -96,7 +96,7 @@ class InstituteController {
       const { error, value } = updateValidaation.validate(req.body);
 
       if (error) {
-        sendResponse(res, 401, {
+        return sendResponse(res, 401, {
           error: true,
           message: "Bad Request!" + error.message,
         });
@@ -105,19 +105,19 @@ class InstituteController {
       const updated = await instituteService.updateDoc({ id, value });
 
       if (!updated) {
-        sendResponse(res, 403, {
+        return sendResponse(res, 403, {
           error: true,
           message: "Failed to update!",
         });
       }
 
-      sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: false,
         message: "Institute updated successfully!",
         data: { ...updated },
       });
     } catch (err) {
-      sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: true,
         message: err || "Internal server error!",
       });
@@ -129,17 +129,17 @@ class InstituteController {
       const deleted = await instituteService.deleteDoc(req.params.id);
 
       if (!deleted) {
-        sendResponse(res, 403, {
+        return sendResponse(res, 403, {
           error: true,
           message: "Failed to delete institute!",
         });
       }
-      sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: false,
         message: "Institute deleted successfully!",
       });
     } catch (err) {
-      sendResponse(res, 500, {
+      return sendResponse(res, 500, {
         error: true,
         message: err || "Internal server error!",
       });

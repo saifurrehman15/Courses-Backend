@@ -9,8 +9,8 @@ const UserSchema = new Schema(
     password: { type: String, required: true },
     role: { type: String, default: "user" },
     institute: {
-      instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
       duration: { type: String },
+      instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
     },
   },
   { timestamps: true }

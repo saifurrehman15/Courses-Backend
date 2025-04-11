@@ -1,3 +1,5 @@
+import sendResponse from "../helper/response-sender.js";
+import { instituteModal } from "../institute/schema.js";
 import { userModel } from "../user/user-schema.js";
 import dayjs from "dayjs";
 
@@ -6,12 +8,14 @@ const trackDuration = async (req, res, next) => {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
 
-    if (!user || !user.institute || !user.institute.duration) {
+    if (!user.institute.duration) {
       return next();
     }
+    console.log(user.institute);
 
     const { duration } = user.institute;
-    const [durationNumber, inMYD] = duration.split(" "); 
+
+    const [durationNumber, inMYD] = duration.split(" ");
 
     if (!durationNumber || !inMYD) {
       return res.status(400).json({
@@ -36,16 +40,23 @@ const trackDuration = async (req, res, next) => {
     let daysLeft = dayjs().diff(monthsAgo, "days");
 
     if (daysLeft === 0) {
-      await userModel.findByIdAndUpdate(userId, {
-        $unset: { institute: "" },
+      await Promise.all([
+        instituteModal.findByIdAndUpdate(user.institute, {
+          status: "completed",
+        }),
+        userModel.findByIdAndUpdate(userId, {
+          $unset: { institute: "" },
+        }),
+      ]);
+      return sendResponse(res, 200, {
+        error: true,
+        message: `You have successfully completed this course!`,
       });
     } else {
-      return res
-        .status(403)
-        .json({
-          error: true,
-          message: `You can apply after ${daysLeft} days!`,
-        });
+      return sendResponse(res, 403, {
+        error: true,
+        message: `You can apply after ${daysLeft} days!`,
+      });
     }
 
     next();
