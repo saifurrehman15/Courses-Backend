@@ -10,7 +10,7 @@ const UserSchema = new Schema(
     role: { type: String, default: "user" },
     institute: {
       instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
-      duration: String,
+      duration: { type: String },
     },
   },
   { timestamps: true }

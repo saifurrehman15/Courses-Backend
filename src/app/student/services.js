@@ -16,10 +16,12 @@ class StudentService {
       return { error: "The institute in which you are applying is not found!" };
     }
 
-    const [durationNumber, inMYD] = institute
-      .toObject()
-      .duration.trim()
-      .split(" ");
+    const alreadyStudying = user?.institute?.duration;
+    console.log(alreadyStudying);
+
+    const [durationNumber, inMYD] =
+      alreadyStudying.trim().split(" ") || institute.toObject().duration.trim().split(" ");
+console.log("format=>",durationNumber,"format=>",inMYD);
 
     let parseDuration = Number(durationNumber);
     let inMYDLowerCase = inMYD.toLowerCase();
@@ -32,14 +34,12 @@ class StudentService {
         status: 400,
       };
     }
-    const alreadyStudying = user?.institute?.admissionAt;
-    console.log(alreadyStudying);
 
     const monthsAgo = dayjs().subtract(parseDuration, inMYDLowerCase);
     let daysLeft = dayjs().diff(monthsAgo, "days");
 
     const condition1 =
-      alreadyApplied && dayjs(user?.institute?.admissionAt).isBefore(monthsAgo);
+      alreadyApplied && dayjs(parseDuration).isBefore(monthsAgo);
 
     const condition2 =
       alreadyApplied?.status == "pending" &&
@@ -101,13 +101,13 @@ class StudentService {
   }
 
   async update({ id, value, user }) {
-    
-      const updated = await studentModal
-  .findByIdAndUpdate(id, value, { new: true })
-  
+    const updated = await studentModal.findByIdAndUpdate(id, value, {
+      new: true,
+    });
 
+    const ins = await instituteModal.findById(updated.institute);
 
-    console.log(updated);
+    console.log(ins);
 
     if (!updated) {
       return { error: "Student application not found", status: 404 };
@@ -120,15 +120,18 @@ class StudentService {
       },
       { $set: { status: "expired" } }
     );
-    
-    let data = await userModel.findByIdAndUpdate(user._id, {
-      $set: {
-        institute: {
-          instituteId: updated.institute,
-          duration: updated.status,
+
+    const data = await userModel.findByIdAndUpdate(
+      user._id,
+      {
+        $set: {
+          "institute.duration": "6 months",
+          "institute.instituteId": updated.institute,
         },
       },
-    });
+      { new: true }
+    );
+
     console.log(data);
 
     return updated;
