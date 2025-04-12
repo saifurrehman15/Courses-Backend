@@ -24,6 +24,8 @@ class CourseService {
   }
 
   async create({ user, body }) {
+    console.log(body);
+    
     const { error, value } = validateSchema.validate(body);
     if (error) {
       sendResponse(res, 400, { error: true, message: error.message });
