@@ -25,7 +25,7 @@ router.put(
 );
 router.delete(
   "/delete-application/:id",
-  [authenticateUser, hasAccess],
+  [authenticateUser,hasAccess],
   studentController.delete
 );
 
