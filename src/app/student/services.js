@@ -1,5 +1,6 @@
 import { dbQueries } from "../../utils/db/queries.js";
 import { instituteModal } from "../institute/schema.js";
+import { userModel } from "../user/user-schema.js";
 import { studentModal } from "./schema.js";
 import dayjs from "dayjs";
 
@@ -8,36 +9,27 @@ class StudentService {
     let alreadyApplied = await studentModal.findOne({
       institute: value.institute,
       appliedBy: user._id,
-      status: "pending",
     });
 
     let institute = await instituteModal.findOne({ _id: value.institute });
-
-    institute = institute.toObject().duration.split(" ");
-
-    let durationNumber = Number(institute[0]);
-    let inMYD = institute[1].toLowerCase();
-
-    const validUnits = ["months", "month", "year", "years"];
-
-    if (!validUnits.includes(inMYD)) {
-      return console.error("Invalid unit in duration.");
+    if (!institute) {
+      return { error: "The institute in which you are applying is not found!" };
     }
 
-    const monthsAgo = dayjs().subtract(durationNumber, inMYD);
-    let daysLeft = dayjs().diff(monthsAgo, "days");
+    const condition2 =
+      alreadyApplied?.status == "pending" &&
+      value.institute !== alreadyApplied?.institute.toString();
 
-    if (
-      (alreadyApplied?.createdAt &&
-        dayjs(alreadyApplied.createdAt).isBefore(monthsAgo)) ||
-      !alreadyApplied ||
-      (alreadyApplied.status == "pending" &&
-        alreadyApplied.institute.toString() &&
-        value.institute !== alreadyApplied?.institute.toString())
-    ) {
+    const condition3 =
+      alreadyApplied && value.institute == alreadyApplied?.institute.toString();
+
+    if (!alreadyApplied || condition2) {
       return await studentModal.create({ ...value, appliedBy: user._id });
-    } else {
-      return { error: `You are not allowed to apply before ${daysLeft} days!` };
+    } else if (condition3) {
+      return {
+        error: `You have already applied to this institute please wait until they approve your application!`,
+        status: 400,
+      };
     }
   }
 
@@ -69,23 +61,60 @@ class StudentService {
         page
       )
     );
-    
   }
 
-  async findOne(id) {
-    return await studentModal.findById(id);
+  async findOne(queries) {
+    return await studentModal.findOne(queries);
   }
 
   async findOwnApplication(id) {
     return await studentModal.find({ appliedBy: id });
   }
 
-  async update({ id, value }) {
-    return studentModal.findByIdAndUpdate(id, value);
+  async update({ id, value, user }) {
+    const findApplication = await studentModal.findById(id);
+
+    if (!findApplication) {
+      return { error: "Student application not found", status: 404 };
+    } else if (findApplication.status === "expired") {
+      return { error: "This application is expired!", status: 403 };
+    }
+    const updated = await studentModal.findByIdAndUpdate(id, value, {
+      new: true,
+    });
+    let ins = await instituteModal.findById(updated.institute);
+    ins = ins?.toObject();
+
+    await studentModal.updateMany(
+      {
+        appliedBy: user._id,
+        status: "pending",
+      },
+      { $set: { status: "expired" } }
+    );
+
+    const data = await userModel.findByIdAndUpdate(
+      user._id,
+      {
+        $set: {
+          institute: {
+            duration: ins.duration,
+            instituteId: updated.institute,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    console.log(data);
+
+    return updated;
   }
 
   async delete(id) {
-    return studentModal.findByIdAndDelete(id);
+    const deleted = await studentModal.findByIdAndDelete(id);
+
+    return deleted;
   }
 }
 

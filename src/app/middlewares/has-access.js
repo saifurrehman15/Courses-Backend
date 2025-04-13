@@ -1,6 +1,7 @@
 import sendResponse from "../helper/response-sender.js";
 import { courseService } from "../courses/services.js";
 import { instituteService } from "../institute/services.js";
+import { studentServices } from "../student/services.js";
 
 const hasAccess = async (req, res, next) => {
   const user = req.user;
@@ -35,13 +36,38 @@ const hasAccess = async (req, res, next) => {
         });
       }
     }
+
+    // applications
+    if (route.includes("application")) {
+      const application = await studentServices.findOne({
+        _id: req.params.id,
+      });
+
+      const { institute, appliedBy } = application.toObject();
+
+      if (institute.toString() === user?.institute?.instituteId?.toString()) {
+        req.messageSend =
+          "The application was suspended by your institute!";
+        return next();
+      }
+
+      if (appliedBy.toString() === user._id.toString()) {
+        req.messageSend =
+          "The application was successfully deleted by the user!";
+        return next();
+      }
+
+      return sendResponse(res, 400, {
+        error: true,
+        message: "You don't have access to this application!",
+      });
+    }
   } catch (error) {
     sendResponse(res, 500, {
       error: true,
       message: "Internal server error!",
     });
   }
-
 };
 
 export default hasAccess;
