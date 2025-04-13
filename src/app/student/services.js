@@ -37,7 +37,7 @@ class StudentService {
     ) {
       return await studentModal.create({ ...value, appliedBy: user._id });
     } else {
-      return { error: `You can apply after ${daysLeft} days!` };
+      return { error: `You are not allowed to apply before ${daysLeft} days!` };
     }
   }
 
