@@ -19,12 +19,14 @@ router.delete("/courses/:id", [authenticateUser, hasAccess ] ,coursesController.
 // courses categories routes
 router.post("/courses/category",authenticateUser,categoryController.create);
 router.get("/courses/category/:id",authenticateUser,categoryController.findAll);
+router.put("/courses/category/:id",authenticateUser,categoryController.update);
+router.delete("/courses/category/:id",authenticateUser,categoryController.delete);
 
 
 // courses items routes
-router.get("/courses/:id/items", coursesItemsController.index);
 router.post("/courses/items", authenticateUser, coursesItemsController.create);
-router.get("/courses/:id/items/:id", coursesItemsController.show);
+router.get("/courses/items/:id", coursesItemsController.index);
+router.get("/courses/single-items/:id", coursesItemsController.show);
 router.put("/courses/:id/items/:id", [ authenticateUser, hasAccess ], coursesItemsController.update);
 router.delete("/courses/:id/items/:id", [ authenticateUser, hasAccess ], coursesItemsController.delete);
 

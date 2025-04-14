@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { dbQueries } from "../../../utils/db/queries.js";
 import { itemsCategoryModal } from "./schema.js";
 
@@ -18,6 +19,7 @@ class CategoryServices {
     const { search = "", limits = 5, page = 1 } = queries;
     let limitsInNumber = Number(limits);
     let skipsOffset = (page - 1) * limitsInNumber;
+    console.log(skipsOffset);
 
     let query = {};
     console.log("search", queries.search);
@@ -29,12 +31,13 @@ class CategoryServices {
     }
     console.log(query);
 
-    query.course = param.id;
+    query.course = new mongoose.Types.ObjectId(param.id);
+
     console.log(query);
     const datas = await itemsCategoryModal.aggregate(
       dbQueries.paginationQuery(
         query,
-        "categories",
+        "category",
         skipsOffset,
         limitsInNumber,
         page
@@ -44,6 +47,14 @@ class CategoryServices {
     console.log("result", datas);
 
     return datas;
+  }
+
+  async update(id, value) {
+    return itemsCategoryModal.findByIdAndUpdate(id, value, { $new: true });
+  }
+
+  async delete(id) {
+    return itemsCategoryModal.findByIdAndDelete(id);
   }
 }
 

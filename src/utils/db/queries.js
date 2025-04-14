@@ -1,4 +1,3 @@
-
 class Queries {
   paginationQuery(query, data, skipsOffset, limitsInNumber, page) {
     return [
@@ -19,11 +18,17 @@ class Queries {
             page: { $literal: page },
             limit: { $literal: limitsInNumber },
             totalPages: {
-              $ceil: {
-                $divide: [
-                  { $arrayElemAt: ["$metadata.total", 0] },
-                  limitsInNumber,
-                ],
+              $cond: {
+                if: { $gt: [{ $arrayElemAt: ["$metadata.total", 0] }, 0] },
+                then: {
+                  $ceil: {
+                    $divide: [
+                      { $arrayElemAt: ["$metadata.total", 0] },
+                      limitsInNumber,
+                    ],
+                  },
+                },
+                else: 0,
               },
             },
           },

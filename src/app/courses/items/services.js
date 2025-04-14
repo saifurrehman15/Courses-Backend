@@ -1,52 +1,30 @@
-
 import mongoose from "mongoose";
 import sendResponse from "../../helper/response-sender.js";
 import { courseModel } from "../schema.js";
 import { courseItemModel } from "./schema.js";
 import { validateSchema } from "./validate.js";
+import { dbQueries } from "../../../utils/db/queries.js";
 
 class CoursesItemsService {
-    async find({ courseId, page, limit, search }) {
-        const skip = (page - 1) * limit;
-        const matchStage = search ? { $match: {
-            course : new mongoose.Types.ObjectId(courseId),
-            $or : [
-                { title: { $regex: search, $options: "i" } },
-                { description: { $regex: search, $options: "i" } },
-            ]
-        } } : {
-            $match: {
-                course: new mongoose.Types.ObjectId(courseId),
-            }
+  async find({ courseId, page, limit, search }) {
+    console.log(courseId);
+
+    const skip = (page - 1) * limit;
+    const matchStage = search
+      ? {
+          category: new mongoose.Types.ObjectId(courseId),
+          $or: [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {
+          category: new mongoose.Types.ObjectId(courseId),
         };
-        return await courseItemModel.aggregate([
-            matchStage,
-            {
-                $facet: {
-                  metadata: [{ $count: "total" }],
-                  data: [{ $skip: skip }, { $limit: limit }]
-                }
-              },
-              {
-                $project: {
-                  courses_items: "$data",
-                  pagination: {
-                      total: { $arrayElemAt: ["$metadata.total", 0] },
-                      page: { $literal: page },
-                      limit: { $literal: limit },
-                      totalPages: {
-                        $ceil: {
-                          $divide: [
-                            { $arrayElemAt: ["$metadata.total", 0] },
-                            limit
-                          ]
-                        }
-                      }
-                  }
-                }
-              }
-        ]);
-    }
+    return await courseItemModel.aggregate(
+      dbQueries.paginationQuery(matchStage, "courses_items", skip, limit, page)
+    );
+  }
 }
 
 export const courseItemsService = new CoursesItemsService();

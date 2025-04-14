@@ -1,6 +1,5 @@
 import sendResponse from "../../helper/response-sender.js";
-import { courseModel } from "../schema.js";
-
+import { itemsCategoryModal } from "../items-category/schema.js";
 import { courseService } from "../services.js";
 import { courseItemModel } from "./schema.js";
 import { courseItemsService } from "./services.js";
@@ -8,11 +7,44 @@ import { courseItemsService } from "./services.js";
 import { validateSchema } from "./validate.js";
 
 class CoursesItemsController {
+  async create(req, res) {
+    try {
+      const { error, value } = validateSchema.validate(req.body);
+      if (error) {
+        return sendResponse(res, 400, { error: true, message: error.message });
+      }
+
+      const courseExists = await itemsCategoryModal.findById(value.category);
+      if (!courseExists) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "Course not found!",
+        });
+      }
+
+      const courseItem = await courseItemModel.create({ ...value });
+
+      return sendResponse(res, 201, {
+        error: false,
+        message: "Course item created successfully!",
+        data: { courseItem },
+      });
+    } catch (err) {
+      return sendResponse(res, 500, {
+        error: true,
+        message: err.message || "Internal server error!",
+      });
+    }
+  }
+
   async index(req, res) {
     const { limit = 10, page = 1, search = null } = req.query;
     try {
       const courseId = req.params.id;
-      const courseExists = await courseService.findById({ id: courseId });
+      console.log(courseId);
+
+      const courseExists = await itemsCategoryModal.findById(courseId);
+      console.log(courseExists);
 
       if (!courseExists) {
         return sendResponse(res, 404, {
@@ -30,40 +62,7 @@ class CoursesItemsController {
       return sendResponse(res, 200, {
         error: false,
         message: "Course items fetched successfully!",
-        data: { course: courseExists, courseItems },
-      });
-    } catch (err) {
-      return sendResponse(res, 500, {
-        error: true,
-        message: err.message || "Internal server error!",
-      });
-    }
-  }
-
-  async create(req, res) {
-    try {
-      const { error, value } = validateSchema.validate(req.body);
-      if (error) {
-        return sendResponse(res, 400, { error: true, message: error.message });
-      }
-
-      const courseExists = await courseModel.findById(value.course);
-      if (!courseExists) {
-        return sendResponse(res, 404, {
-          error: true,
-          message: "Course not found!",
-        });
-      }
-
-      const courseItem = await courseItemModel.create({
-        ...value,
-        course: value.course,
-      });
-
-      return sendResponse(res, 201, {
-        error: false,
-        message: "Course item created successfully!",
-        data: { courseItem },
+        data: { category: courseExists, ...courseItems[0] },
       });
     } catch (err) {
       return sendResponse(res, 500, {
