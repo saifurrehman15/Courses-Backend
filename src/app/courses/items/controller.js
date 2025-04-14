@@ -76,6 +76,12 @@ class CoursesItemsController {
     try {
       const courseItemId = req.params.id;
       const courseItem = await courseItemModel.findById(courseItemId);
+      if (!courseItem) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "The course item not found!",
+        });
+      }
       return sendResponse(res, 200, {
         error: false,
         message: "Course item fetched successfully!",
