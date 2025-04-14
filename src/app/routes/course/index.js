@@ -11,16 +11,17 @@ const router = express.Router();
 
 // courses routes
 router.get("/courses", coursesController.index)
-router.post("/courses" , [authenticateUser,hasAccess] ,coursesController.create)
+router.post("/courses" , [authenticateUser,hasAccess] , coursesController.create)
 router.get("/courses/:id", coursesController.show)
-router.put("/courses/:id",  [authenticateUser, hasAccess ],coursesController.update)
-router.delete("/courses/:id", [authenticateUser, hasAccess ] ,coursesController.delete)
+router.put("/courses/:id",  [authenticateUser, hasAccess ], coursesController.update)
+router.delete("/courses/:id", [authenticateUser, hasAccess ] , coursesController.delete)
 
 // courses categories routes
-router.post("/courses/category",authenticateUser,categoryController.create);
-router.get("/courses/category/:id",authenticateUser,categoryController.findAll);
-router.put("/courses/category/:id",authenticateUser,categoryController.update);
-router.delete("/courses/category/:id",authenticateUser,categoryController.delete);
+router.post("/courses/category",[authenticateUser,hasAccess],categoryController.create);
+router.get("/courses/category/:id",categoryController.findAll);
+router.get("/courses/single-category/:id",categoryController.findOne);
+router.put("/courses/category/:id",[authenticateUser,hasAccess],categoryController.update);
+router.delete("/courses/category/:id",[authenticateUser,hasAccess],categoryController.delete);
 
 
 // courses items routes

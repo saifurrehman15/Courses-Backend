@@ -5,7 +5,7 @@ import hasAccess from "../../middlewares/has-access.js";
 
 const router = express.Router();
 
-router.post("/create-institute", authenticateUser, instituteController.create);
+router.post("/create-institute", [authenticateUser,hasAccess], instituteController.create);
 router.get("/all-institute", authenticateUser, instituteController.find);
 router.get("/single-institute/:id", instituteController.findOne);
 router.put("/update-institute/:id", [authenticateUser,hasAccess], instituteController.update);

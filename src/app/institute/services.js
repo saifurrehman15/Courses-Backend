@@ -1,13 +1,22 @@
 import { dbQueries } from "../../utils/db/queries.js";
+import { userModel } from "../user/user-schema.js";
 import { instituteModal } from "./schema.js";
 
 class InstituteServices {
   async create({ body, user }) {
-    const findInstitute = await instituteModal({ cnic: body.cnic });
+    const findInstitute = await instituteModal.findOne({ ownerCnic:body.ownerCnic });
 
     if (findInstitute) return null;
-
-    return await instituteModal.create({ ...body, createdBy: user._id });
+    const instituteCreated = await instituteModal.create({
+      ...body,
+      createdBy: user._id,
+    });
+    await userModel.findByIdAndUpdate(user._id, {
+      $set: {
+        owner: instituteCreated._id,
+      },
+    });
+    return instituteCreated;
   }
 
   async findAll(queries) {
@@ -50,7 +59,15 @@ class InstituteServices {
   }
 
   async deleteDoc(id) {
-    return instituteModal.findByIdAndDelete(id).lean();
+    const deleted = await instituteModal.findByIdAndDelete(id).lean();
+
+    await userModel.findByIdAndUpdate(deleted.createdBy, {
+      $unset: {
+        owner: "",
+      },
+    });
+    
+    return deleted;
   }
 }
 

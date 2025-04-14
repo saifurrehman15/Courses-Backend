@@ -49,6 +49,10 @@ class CategoryServices {
     return datas;
   }
 
+  async findOne(query) {
+    return await itemsCategoryModal.findOne(query);
+  }
+
   async update(id, value) {
     return itemsCategoryModal.findByIdAndUpdate(id, value, { $new: true });
   }

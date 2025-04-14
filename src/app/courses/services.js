@@ -1,7 +1,6 @@
 import { dbQueries } from "../../utils/db/queries.js";
-import sendResponse from "../helper/response-sender.js";
 import { courseModel } from "./schema.js";
-import { validateSchema } from "./validate.js";
+
 class CourseService {
   async find({ page, limit, search }) {
     const skip = (page - 1) * limit;

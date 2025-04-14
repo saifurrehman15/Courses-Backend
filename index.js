@@ -7,6 +7,7 @@ import userRoute from "./src/app/routes/user-route/user-route.js";
 import courseRoute from "./src/app/routes/course/index.js";
 import instituteRoutes from "./src/app/routes/institute-route/index.js";
 import studentRoute from "./src/app/routes/student/index.js";
+import fileRoute from "./src/app/routes/upload-files/index.js";
 import passport from "./src/utils/passport-utils/passport-util.js";
 import session from "express-session";
 
@@ -37,6 +38,7 @@ app.use("/api", userRoute);
 app.use("/api", courseRoute);
 app.use("/api", instituteRoutes);
 app.use("/api", studentRoute);
+app.use("/api", fileRoute);
 
 app.get("/", (req, res) => {
   res.send("Server is running on port " + port);

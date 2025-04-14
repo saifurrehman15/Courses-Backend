@@ -96,7 +96,7 @@ class InstituteController {
       const { error, value } = updateValidaation.validate(req.body);
 
       if (error) {
-        return sendResponse(res, 401, {
+        return sendResponse(res, 400, {
           error: true,
           message: "Bad Request!" + error.message,
         });
@@ -107,7 +107,7 @@ class InstituteController {
       if (!updated) {
         return sendResponse(res, 403, {
           error: true,
-          message: "Failed to update!",
+          message: "Failed to update institute!",
         });
       }
 

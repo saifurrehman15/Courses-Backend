@@ -28,6 +28,9 @@ class CoursesController {
   async show(req, res) {
     try {
       const course = await courseService.findById({ id: req.params.id });
+      if (!course) {
+        return sendResponse(res,404,{error:true,message:"course not "})
+      }
       return sendResponse(res, 200, {
         error: false,
         message: "Course fetched successfully!",

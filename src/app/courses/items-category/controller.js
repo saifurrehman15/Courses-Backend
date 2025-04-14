@@ -40,6 +40,13 @@ class Category {
       const categories = await categoryServices.findAll(req.query, req.params);
       console.log("hy", categories);
 
+      if (!categories || categories.length == 0) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "Course category not found!",
+        });
+      }
+
       return sendResponse(res, 200, {
         error: false,
         message: "Categories fetched successfully!",
@@ -49,6 +56,39 @@ class Category {
       return sendResponse(res, 200, {
         error: true,
         message: err || "Internal server error!",
+      });
+    }
+  }
+
+  async findOne(req, res) {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        return sendResponse(res, 400, {
+          error: true,
+          message: "Id is not provided!",
+        });
+      }
+
+      const service = await categoryServices.findOne({ _id: id });
+
+      if (!service) {
+        return sendResponse(res, 403, {
+          error: true,
+          message: "Failed to fetched category!",
+        });
+      }
+
+      return sendResponse(res, 200, {
+        error: true,
+        message: "Category fetched successfully!",
+        data: { category: service },
+      });
+    } catch (error) {
+      console.error(error);
+      return sendResponse(res, 500, {
+        error: true,
+        message: "Internal server error!",
       });
     }
   }

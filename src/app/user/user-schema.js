@@ -8,6 +8,7 @@ const UserSchema = new Schema(
     email: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, default: "user" },
+    owner: { type: mongoose.Types.ObjectId, ref: "institutes" },
     institute: {
       duration: { type: String },
       instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },

@@ -18,6 +18,7 @@ const updateValidaation = Joi.object({
   instituteAddress: Joi.string().min(3).optional(),
   phone: Joi.string().length(11).pattern(/^\d+$/).optional(),
   instituteLogo: Joi.string().optional(),
+  approvedByAdmin: Joi.boolean().default(false).optional(),
 });
 
 export { validateInstitute, updateValidaation };
