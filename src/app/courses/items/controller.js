@@ -42,22 +42,24 @@ class CoursesItemsController {
 
   async create(req, res) {
     try {
-      const courseId = req.params.id;
-      const courseExists = await courseModel.findById(courseId);
+      const { error, value } = validateSchema.validate(req.body);
+      if (error) {
+        return sendResponse(res, 400, { error: true, message: error.message });
+      }
+
+      const courseExists = await courseModel.findById(value.course);
       if (!courseExists) {
         return sendResponse(res, 404, {
           error: true,
           message: "Course not found!",
         });
       }
-      const { error, value } = validateSchema.validate(req.body);
-      if (error) {
-        return sendResponse(res, 400, { error: true, message: error.message });
-      }
+
       const courseItem = await courseItemModel.create({
         ...value,
-        course: courseId,
+        course: value.course,
       });
+
       return sendResponse(res, 201, {
         error: false,
         message: "Course item created successfully!",
@@ -100,17 +102,17 @@ class CoursesItemsController {
       }
       const { error, value } = validateSchema.validate(req.body);
       if (error) {
-        return  sendResponse(res, 400, { error: true, message: error.message });
+        return sendResponse(res, 400, { error: true, message: error.message });
       }
       courseItem.set(value);
       await courseItem.save();
-      return   sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: false,
         message: "Course item updated successfully!",
         data: { courseItem },
       });
     } catch (err) {
-      return  sendResponse(res, 500, {
+      return sendResponse(res, 500, {
         error: true,
         message: err.message || "Internal server error!",
       });
@@ -121,12 +123,12 @@ class CoursesItemsController {
     try {
       const courseItemId = req.params.id;
       const courseItem = await courseItemModel.findByIdAndDelete(courseItemId);
-      return   sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: false,
         message: "Course item deleted successfully!",
       });
     } catch (err) {
-      return    sendResponse(res, 500, {
+      return sendResponse(res, 500, {
         error: true,
         message: err.message || "Internal server error!",
       });

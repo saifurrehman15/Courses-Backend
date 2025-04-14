@@ -1,6 +1,6 @@
 import { courseModel } from "./schema.js";
 import sendResponse from "../helper/response-sender.js";
-import { validateSchema } from "./validate.js";
+import { updateSchema, validateSchema } from "./validate.js";
 import { courseService } from "./services.js";
 class CoursesController {
   async index(req, res) {
@@ -43,8 +43,12 @@ class CoursesController {
 
   async create(req, res) {
     try {
+      const { error, value } = validateSchema.validate(req.body);
+      if (error) {
+        return sendResponse(res, 400, { error: true, message: error.message });
+      }
       const course = await courseService.create({
-        body: req.body,
+        body: value,
         user: req.user,
       });
       return sendResponse(res, 201, {
@@ -62,9 +66,13 @@ class CoursesController {
 
   async update(req, res) {
     try {
+      let { error, value } = updateSchema.validate(req.body);
+      if (error) {
+        return sendResponse(res, 400, { error: true, message: error.message });
+      }
       const course = await courseService.update({
         id: req.params.id,
-        body: req.body,
+        body: value,
       });
       return sendResponse(res, 200, {
         error: false,

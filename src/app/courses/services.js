@@ -5,6 +5,8 @@ import { validateSchema } from "./validate.js";
 class CourseService {
   async find({ page, limit, search }) {
     const skip = (page - 1) * limit;
+    console.log(search);
+    
     const matchStage = search
       ? {
           $or: [
@@ -24,21 +26,11 @@ class CourseService {
   }
 
   async create({ user, body }) {
-    console.log(body);
-    
-    const { error, value } = validateSchema.validate(body);
-    if (error) {
-      sendResponse(res, 400, { error: true, message: error.message });
-    }
-    return await courseModel.create({ ...value, user: user._id });
+    return await courseModel.create({ ...body, user: user._id });
   }
 
   async update({ id, body }) {
-    let { error, value } = validateSchema.validate(body);
-    if (error) {
-      sendResponse(res, 400, { error: true, message: error.message });
-    }
-    return await courseModel.findByIdAndUpdate(id, value, { new: true });
+    return await courseModel.findByIdAndUpdate(id, body, { new: true });
   }
 
   async delete({ id }) {

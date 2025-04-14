@@ -6,17 +6,50 @@ import { studentServices } from "../student/services.js";
 const hasAccess = async (req, res, next) => {
   const user = req.user;
   const route = req.route.path;
+  const method = req.method;
+  const body = req.body;
+  console.log(req.method);
 
   try {
     if (route.includes("course")) {
-      const course = await courseService.findById({ id: req.params.id });
-      if (course.user.toString() === user._id.toString()) {
-        next();
-      } else {
-        sendResponse(res, 400, {
-          error: true,
-          message: "You don't have access to this course!",
+      if (method !== "POST") {
+        const course = await courseService.findById({ id: req.params.id });
+
+        const institute = await instituteService.findOne({
+          _id: course.createdBy,
         });
+
+        console.log(institute);
+
+        if (course?.createdBy.toString() === institute._id.toString()) {
+          next();
+        } else {
+          return sendResponse(res, 400, {
+            error: true,
+            message: "You don't have access to this course!",
+          });
+        }
+      } else {
+        const institute = await instituteService.findOne({
+          _id: body?.createdBy,
+        });
+
+        if (!institute) {
+          return sendResponse(res, 404, {
+            error: true,
+            message: "Institute not found!",
+          });
+        }
+
+        if (!institute.approvedByAdmin) {
+          return sendResponse(res, 403, {
+            error: true,
+            message:
+              "Please wait untill request will be accepted for registeration of institute!",
+          });
+        } else {
+          next();
+        }
       }
     }
 
@@ -30,7 +63,7 @@ const hasAccess = async (req, res, next) => {
       if (institute) {
         next();
       } else {
-        sendResponse(res, 400, {
+        return sendResponse(res, 400, {
           error: true,
           message: "You don't have access to this institute!",
         });
@@ -46,8 +79,7 @@ const hasAccess = async (req, res, next) => {
       const { institute, appliedBy } = application.toObject();
 
       if (institute.toString() === user?.institute?.instituteId?.toString()) {
-        req.messageSend =
-          "The application was suspended by your institute!";
+        req.messageSend = "The application was suspended by your institute!";
         return next();
       }
 
@@ -63,7 +95,7 @@ const hasAccess = async (req, res, next) => {
       });
     }
   } catch (error) {
-    sendResponse(res, 500, {
+    return sendResponse(res, 500, {
       error: true,
       message: "Internal server error!",
     });
