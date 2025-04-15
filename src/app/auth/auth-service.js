@@ -39,7 +39,6 @@ const loginService = async (value) => {
   let objWithoutPass = userExist.toObject();
   delete objWithoutPass.password;
 
-
   const { accessToken, refreshToken } = token(objWithoutPass);
 
   return { user: objWithoutPass, accessToken, refreshToken };
@@ -53,7 +52,6 @@ const googleService = async (value) => {
     email: value.emails[0].value,
     provider: "google",
   };
-
 
   if (!userExist) {
     let newUser = new userModel({ ...obj });
@@ -74,6 +72,14 @@ const googleService = async (value) => {
   }
 };
 
-// referesh token service
+const forgetPasswordService = async (value) => {
+  const checkUser = await userModel.findOne({ email: value.email });
+
+  if (!checkUser) {
+    return { error: "User not found with this email!", status: 404 };
+  }
+
+  return checkUser;
+};
 
 export { registerService, loginService, googleService };

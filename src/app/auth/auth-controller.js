@@ -7,6 +7,7 @@ import {
 
 import { validateSchema } from "../user/user-validate.js";
 import token from "../helper/token-generate.js";
+import Joi from "joi";
 
 // register controller
 const signUp = async (req, res) => {
@@ -38,7 +39,6 @@ const signUp = async (req, res) => {
 
 // login controller
 const login = async (req, res) => {
-
   const { error, value } = validateSchema.validate(req.body);
 
   if (error) {
@@ -64,7 +64,6 @@ const googleAuthenticate = async (req, res) => {
     if (!req.user) {
       sendResponse(res, 401, { error: true, message: "Authentication failed" });
     }
-
 
     const obj = await googleService(req.user);
 
@@ -97,7 +96,6 @@ const logOut = async (req, res) => {
 // referesh token
 
 const refereshToken = (req, res) => {
-
   let getToken = token(req.user);
   let { accessToken, refreshToken } = getToken;
 
@@ -110,6 +108,22 @@ const refereshToken = (req, res) => {
     message: "Token successfully refreshed",
     data: { accessToken, refreshToken },
   });
+};
+
+const forgetPassword = async (req, res) => {
+  const validation = Joi.object({
+    email: Joi.string().email().required(),
+  });
+
+  const { error, value } = validation.validate(req.body);
+
+  if (error) {
+    return sendResponse(res, 400, { error: true, message: error.message });
+  }
+
+  const service = await forgetPasswordService(value);
+
+  
 };
 
 export { signUp, login, googleAuthenticate, logOut, refereshToken };

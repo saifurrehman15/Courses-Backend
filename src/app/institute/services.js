@@ -14,11 +14,12 @@ class InstituteServices {
         status: 403,
       };
     }
-    
+
     const instituteCreated = await instituteModal.create({
       ...body,
       createdBy: user._id,
     });
+
     await userModel.findByIdAndUpdate(user._id, {
       $set: {
         owner: instituteCreated._id,
@@ -59,7 +60,7 @@ class InstituteServices {
   }
 
   async findOne(query) {
-    return instituteModal.findOne(query).lean();
+    return await instituteModal.findOne(query).lean();
   }
 
   async updateDoc({ id, value }) {

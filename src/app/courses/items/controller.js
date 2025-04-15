@@ -1,6 +1,5 @@
 import sendResponse from "../../helper/response-sender.js";
 import { itemsCategoryModal } from "../items-category/schema.js";
-import { courseService } from "../services.js";
 import { courseItemModel } from "./schema.js";
 import { courseItemsService } from "./services.js";
 
@@ -75,6 +74,7 @@ class CoursesItemsController {
   async show(req, res) {
     try {
       const courseItemId = req.params.id;
+
       const courseItem = await courseItemModel.findById(courseItemId);
       if (!courseItem) {
         return sendResponse(res, 404, {
@@ -97,6 +97,10 @@ class CoursesItemsController {
 
   async update(req, res) {
     try {
+      const { error, value } = validateSchema.validate(req.body);
+      if (error) {
+        return sendResponse(res, 400, { error: true, message: error.message });
+      }
       const courseItemId = req.params.id;
       const courseItem = await courseItemModel.findById(courseItemId);
       if (!courseItem) {
@@ -105,16 +109,17 @@ class CoursesItemsController {
           message: "Course item not found!",
         });
       }
-      const { error, value } = validateSchema.validate(req.body);
-      if (error) {
-        return sendResponse(res, 400, { error: true, message: error.message });
-      }
-      courseItem.set(value);
-      await courseItem.save();
+
+      const updatedItem = await courseItemModel.findByIdAndUpdate(
+        courseItemId,
+        value,
+        { $new: true }
+      );
+
       return sendResponse(res, 200, {
         error: false,
         message: "Course item updated successfully!",
-        data: { courseItem },
+        data: { updatedItem },
       });
     } catch (err) {
       return sendResponse(res, 500, {

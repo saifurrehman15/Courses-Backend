@@ -35,7 +35,7 @@ class InstituteController {
         data: { institute, user: req.user },
       });
     } catch (error) {
-      sendResponse(res, 500, {
+    return  sendResponse(res, 500, {
         error: true,
         message: error || "Internal server error",
       });
@@ -47,19 +47,19 @@ class InstituteController {
       const getAll = await instituteService.findAll(req.query);
 
       if (!getAll) {
-        sendResponse(res, 403, {
+      return  sendResponse(res, 403, {
           error: true,
           message: "Failed to fetch institutes!",
         });
       }
 
-      sendResponse(res, 200, {
+      return sendResponse(res, 200, {
         error: false,
         message: "Institutes fetched successfully!",
         data: { ...getAll[0] },
       });
     } catch (error) {
-      sendResponse(res, 500, {
+      return  sendResponse(res, 500, {
         error: true,
         message: error || "Internal server error!",
       });
