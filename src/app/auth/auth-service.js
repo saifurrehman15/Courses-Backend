@@ -1,6 +1,8 @@
 import { userModel } from "../user/user-schema.js";
 import bcrypt from "bcryptjs";
 import token from "../helper/token-generate.js";
+import generateOTP from "../helper/generate_otp.js";
+import { Resend } from "resend";
 
 // register service
 const registerService = async (value) => {
@@ -78,6 +80,11 @@ const forgetPasswordService = async (value) => {
   if (!checkUser) {
     return { error: "User not found with this email!", status: 404 };
   }
+
+  const otpGet = generateOTP();
+  const resend = new Resend();
+
+  
 
   return checkUser;
 };
