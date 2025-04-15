@@ -2,6 +2,7 @@ import sendResponse from "../helper/response-sender.js";
 import { instituteService } from "../institute/services.js";
 import { studentServices } from "../student/services.js";
 import { categoryServices } from "../courses/items-category/services.js";
+import { courseItemModel } from "../courses/items/schema.js";
 
 const hasAccess = async (req, res, next) => {
   const user = req.user;
@@ -19,17 +20,17 @@ const hasAccess = async (req, res, next) => {
   console.log(req.method);
 
   try {
-    if (route.includes("category")) {
+    if (route.includes("items")) {
       if (method !== "POST") {
-        const category = await categoryServices.findOne({ _id: req.params.id });
-        if (!category) {
+        const items = await courseItemModel.findOne({ _id: req.params.id });
+        if (!items) {
           return sendResponse(res, 404, {
             error: true,
             message: "Course category is not found!",
           });
         }
 
-        if (isInstituteOwner || isAdmin) {
+        if ((institute && institute.approvedByAdmin) || isAdmin) {
           return next();
         } else {
           return sendResponse(res, 400, {
@@ -41,7 +42,45 @@ const hasAccess = async (req, res, next) => {
         if (!institute) {
           return sendResponse(res, 403, {
             error: true,
-            message: "You are owned any Institute yet!",
+            message: "You are not owned any Institute yet!",
+          });
+        }
+
+        if (!institute.approvedByAdmin) {
+          return sendResponse(res, 403, {
+            error: true,
+            message:
+              "Please wait until request will be accepted for registeration of institute!",
+          });
+        } else if (isAdmin || institute.approvedByAdmin) {
+          return next();
+        }
+      }
+    }
+
+    if (route.includes("category")) {
+      if (method !== "POST") {
+        const category = await categoryServices.findOne({ _id: req.params.id });
+        if (!category) {
+          return sendResponse(res, 404, {
+            error: true,
+            message: "Course category is not found!",
+          });
+        }
+
+        if ((institute && institute.approvedByAdmin) || isAdmin) {
+          return next();
+        } else {
+          return sendResponse(res, 400, {
+            error: true,
+            message: "You don't have access to this course!",
+          });
+        }
+      } else {
+        if (!institute) {
+          return sendResponse(res, 403, {
+            error: true,
+            message: "You are not owned any Institute yet!",
           });
         }
 

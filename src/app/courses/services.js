@@ -25,9 +25,6 @@ class CourseService {
   }
 
   async create({ createdBy, body }) {
-    if (!createdBy) {
-      return null;
-    }
     return await courseModel.create({ ...body, createdBy });
   }
 

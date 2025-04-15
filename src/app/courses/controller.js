@@ -50,7 +50,7 @@ class CoursesController {
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
-console.log(req.user.owner);
+
 
       const course = await courseService.create({
         createdBy: req.user.owner,

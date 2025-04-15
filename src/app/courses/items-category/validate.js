@@ -5,7 +5,6 @@ const validateCategory = Joi.object({
   description: Joi.string().min(3).required(),
   icon: Joi.string().required(),
   course: Joi.string().required(),
-  institute: Joi.string().required(),
 });
 
 const updateCategory = Joi.object({

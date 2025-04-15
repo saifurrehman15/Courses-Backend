@@ -11,7 +11,10 @@ class Category {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
 
-      const category = await categoryServices.create(value);
+      const category = await categoryServices.create({
+        value,
+        institute: req.user.owner,
+      });
 
       if (category.error) {
         return sendResponse(res, category.status, {

@@ -25,7 +25,7 @@ router.delete("/courses/category/:id",[authenticateUser,hasAccess],categoryContr
 
 
 // courses items routes
-router.post("/courses/items", authenticateUser, coursesItemsController.create);
+router.post("/courses/items", [authenticateUser,hasAccess], coursesItemsController.create);
 router.get("/courses/items/:id", coursesItemsController.index);
 router.get("/courses/single-items/:id", coursesItemsController.show);
 router.put("/courses/:id/items/:id", [ authenticateUser, hasAccess ], coursesItemsController.update);

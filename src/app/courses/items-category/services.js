@@ -3,7 +3,12 @@ import { dbQueries } from "../../../utils/db/queries.js";
 import { itemsCategoryModal } from "./schema.js";
 
 class CategoryServices {
-  async create(value) {
+  async create({ value, institute }) {
+    console.log(institute,{
+      ...value,
+      institute: institute.toString(),
+    });
+
     const findCategory = await itemsCategoryModal.findOne({
       title: value.title,
     });
@@ -12,7 +17,10 @@ class CategoryServices {
       return { error: `${value.title} is already exist!`, status: 403 };
     }
 
-    return await itemsCategoryModal.create({ ...value });
+    return await itemsCategoryModal.create({
+      ...value,
+      institute: institute.toString(),
+    });
   }
   //   { course: id }
   async findAll(queries, param) {
