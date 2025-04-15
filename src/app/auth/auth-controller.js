@@ -3,6 +3,8 @@ import {
   loginService,
   registerService,
   googleService,
+  forgetPasswordService,
+  verifyOtpService,
 } from "./auth-service.js";
 
 import { validateSchema } from "../user/user-validate.js";
@@ -110,20 +112,76 @@ const refereshToken = (req, res) => {
   });
 };
 
-const forgetPassword = async (req, res) => {
-  const validation = Joi.object({
-    email: Joi.string().email().required(),
-  });
+const forgetPasswordController = async (req, res) => {
+  try {
+    const validation = Joi.object({
+      email: Joi.string().email().required(),
+    });
 
-  const { error, value } = validation.validate(req.body);
+    console.log("hello");
 
-  if (error) {
-    return sendResponse(res, 400, { error: true, message: error.message });
+    const { error, value } = validation.validate(req.body);
+
+    if (error) {
+      return sendResponse(res, 400, { error: true, message: error.message });
+    }
+
+    const service = await forgetPasswordService(value);
+
+    if (service.error) {
+      return sendResponse(res, service.status, {
+        error: true,
+        message: service.error,
+      });
+    }
+
+    return sendResponse(res, 200, {
+      error: false,
+      message: "Otp sent successfully!",
+      data: { get: service },
+    });
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, 500, {
+      error: true,
+      message: error || "Internal server error!",
+    });
   }
-
-  const service = await forgetPasswordService(value);
-
-  
 };
 
-export { signUp, login, googleAuthenticate, logOut, refereshToken };
+const verifyOtpController = async (req, res) => {
+  try {
+    const service = await verifyOtpService(req.body);
+    console.log(service);
+
+    if (service.error) {
+      return sendResponse(res, service.status, {
+        error: true,
+        message: service.error,
+      });
+    }
+
+    if (service) {
+      return sendResponse(res, 200, {
+        success: true,
+        redirectTo: "/change-password",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, 500, {
+      error: true,
+      message: error || "Internal server error!",
+    });
+  }
+};
+
+export {
+  signUp,
+  login,
+  googleAuthenticate,
+  logOut,
+  refereshToken,
+  forgetPasswordController,
+  verifyOtpController,
+};
