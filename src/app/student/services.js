@@ -16,6 +16,14 @@ class StudentService {
       return { error: "The institute in which you are applying is not found!" };
     }
 
+
+    if (user?.owner?.toString() === value.institute) {
+      return {
+        error: "You are not allowed to apply in your own institute!",
+        status: 403,
+      };
+    }
+
     const condition2 =
       alreadyApplied?.status == "pending" &&
       value.institute !== alreadyApplied?.institute.toString();
@@ -82,31 +90,34 @@ class StudentService {
     const updated = await studentModal.findByIdAndUpdate(id, value, {
       new: true,
     });
-    let ins = await instituteModal.findById(updated.institute);
-    ins = ins?.toObject();
 
-    await studentModal.updateMany(
-      {
-        appliedBy: user._id,
-        status: "pending",
-      },
-      { $set: { status: "expired" } }
-    );
+    if (value.status) {
+      let ins = await instituteModal.findById(updated.institute);
+      ins = ins?.toObject();
 
-    const data = await userModel.findByIdAndUpdate(
-      user._id,
-      {
-        $set: {
-          institute: {
-            duration: ins.duration,
-            instituteId: updated.institute,
+      await studentModal.updateMany(
+        {
+          appliedBy: user._id,
+          status: "pending",
+        },
+        { $set: { status: "expired" } }
+      );
+
+      const data = await userModel.findByIdAndUpdate(
+        user._id,
+        {
+          $set: {
+            institute: {
+              duration: value.duration || "3 months",
+              instituteId: updated.institute,
+            },
           },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
 
-    console.log(data);
+      console.log(data);
+    }
 
     return updated;
   }

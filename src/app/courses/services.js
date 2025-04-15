@@ -5,7 +5,7 @@ class CourseService {
   async find({ page, limit, search }) {
     const skip = (page - 1) * limit;
     console.log(search);
-    
+
     const matchStage = search
       ? {
           $or: [
@@ -14,7 +14,7 @@ class CourseService {
           ],
         }
       : {};
-      
+
     return await courseModel.aggregate(
       dbQueries.paginationQuery(matchStage, "courses", skip, limit, page)
     );
@@ -24,8 +24,11 @@ class CourseService {
     return await courseModel.findById(id);
   }
 
-  async create({ user, body }) {
-    return await courseModel.create({ ...body, user: user._id });
+  async create({ createdBy, body }) {
+    if (!createdBy) {
+      return null;
+    }
+    return await courseModel.create({ ...body, createdBy });
   }
 
   async update({ id, body }) {

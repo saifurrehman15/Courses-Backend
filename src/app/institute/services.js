@@ -4,9 +4,17 @@ import { instituteModal } from "./schema.js";
 
 class InstituteServices {
   async create({ body, user }) {
-    const findInstitute = await instituteModal.findOne({ ownerCnic:body.ownerCnic });
+    const findInstitute = await instituteModal.findOne({
+      $or: [{ ownerCnic: body.ownerCnic }, { createdBy: user._id }],
+    });
 
-    if (findInstitute) return null;
+    if (findInstitute) {
+      return {
+        error: "You can only create one institute with this account!",
+        status: 403,
+      };
+    }
+    
     const instituteCreated = await instituteModal.create({
       ...body,
       createdBy: user._id,
@@ -66,7 +74,7 @@ class InstituteServices {
         owner: "",
       },
     });
-    
+
     return deleted;
   }
 }

@@ -29,7 +29,7 @@ class CoursesController {
     try {
       const course = await courseService.findById({ id: req.params.id });
       if (!course) {
-        return sendResponse(res,404,{error:true,message:"course not "})
+        return sendResponse(res, 404, { error: true, message: "course not " });
       }
       return sendResponse(res, 200, {
         error: false,
@@ -50,10 +50,19 @@ class CoursesController {
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
+console.log(req.user.owner);
+
       const course = await courseService.create({
+        createdBy: req.user.owner,
         body: value,
-        user: req.user,
+        
       });
+      if (!course) {
+        return sendResponse(res, 403, {
+          error: true,
+          message: "Failed to create course!",
+        });
+      }
       return sendResponse(res, 201, {
         error: false,
         message: "Course created successfully!",

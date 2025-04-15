@@ -20,7 +20,7 @@ router.get(
 );
 router.put(
   "/update-application/:id",
-  authenticateUser,
+  [authenticateUser,hasAccess],
   studentController.update
 );
 router.delete(

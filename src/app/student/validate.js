@@ -23,6 +23,7 @@ const validateUpdate = Joi.object({
   status: Joi.string()
     .valid("pending", "approved", "rejected", "expired", "completed")
     .default("pending"),
+  duration: Joi.string().optional(),
 });
 
 export { validateSchema, validateUpdate };

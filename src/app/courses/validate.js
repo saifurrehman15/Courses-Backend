@@ -6,7 +6,6 @@ const validateSchema = Joi.object({
   image: Joi.string().required(),
   level: Joi.string().required(),
   category: Joi.string().required(),
-  createdBy: Joi.string().required(),
   featured: Joi.boolean().required(),
 });
 

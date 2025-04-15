@@ -20,12 +20,12 @@ class InstituteController {
         user: req.user,
       });
 
-      console.log(institute);
+      console.log("Ins", institute);
 
-      if (!institute) {
-        sendResponse(res, 403, {
+      if (institute.error) {
+        return sendResponse(res, institute.status, {
           error: true,
-          message: "You already have registered this institute on this cnic!",
+          message: institute.error,
         });
       }
 

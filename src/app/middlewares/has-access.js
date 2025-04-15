@@ -1,20 +1,20 @@
 import sendResponse from "../helper/response-sender.js";
-import { courseService } from "../courses/services.js";
 import { instituteService } from "../institute/services.js";
 import { studentServices } from "../student/services.js";
 import { categoryServices } from "../courses/items-category/services.js";
-import e from "express";
 
 const hasAccess = async (req, res, next) => {
   const user = req.user;
   const route = req.route.path;
   const method = req.method;
   const isInstituteOwner = user?.owner;
-  const isAdmin = user?.role;
+  const isAdmin = user?.role === "admin";
+  console.log(isInstituteOwner);
 
   const institute = await instituteService.findOne({
     _id: isInstituteOwner,
   });
+  console.log("hello", institute);
 
   console.log(req.method);
 
@@ -29,7 +29,7 @@ const hasAccess = async (req, res, next) => {
           });
         }
 
-        if (isInstituteOwner || user.role === "admin") {
+        if (isInstituteOwner || isAdmin) {
           return next();
         } else {
           return sendResponse(res, 400, {
@@ -59,7 +59,7 @@ const hasAccess = async (req, res, next) => {
 
     if (route.includes("courses")) {
       if (method !== "POST") {
-        if (isInstituteOwner || isAdmin) {
+        if (institute || isAdmin) {
           return next();
         } else {
           return sendResponse(res, 400, {
@@ -89,8 +89,11 @@ const hasAccess = async (req, res, next) => {
 
     // institute
     if (route.includes("institute")) {
+      console.log(institute);
       if (method !== "POST") {
-        if (isInstituteOwner || isAdmin) {
+        console.log("lorem", institute);
+
+        if ((institute && institute?.approvedByAdmin) || isAdmin) {
           return next();
         } else {
           return sendResponse(res, 400, {
@@ -99,27 +102,20 @@ const hasAccess = async (req, res, next) => {
           });
         }
       } else {
-        if (isInstituteOwner || isAdmin) {
-          return next();
-        } else {
-          return sendResponse(res, 400, {
-            error: true,
-            message: "You don't have access to this institute!",
-          });
-        }
+        return next();
       }
     }
 
     // applications
     if (route.includes("application")) {
       if (method !== "POST") {
-        const application = await studentServices.findOne({
-          _id: req.params.id,
-        });
-
-        const { institute, appliedBy } = application.toObject();
-
         if (method === "DELETE") {
+          const application = await studentServices.findOne({
+            _id: req.params.id,
+          });
+
+          const { institute, appliedBy } = application.toObject();
+
           if (
             institute.toString() === user?.institute?.instituteId?.toString()
           ) {
@@ -137,10 +133,9 @@ const hasAccess = async (req, res, next) => {
             });
           }
         } else {
-          if (
-            institute.toString() === isInstituteOwner ||
-            user?.role === "admin"
-          ) {
+          console.log("hello world!");
+
+          if ((institute && institute?.approvedByAdmin) || isAdmin) {
             return next();
           } else {
             return sendResponse(res, 400, {
@@ -150,7 +145,7 @@ const hasAccess = async (req, res, next) => {
           }
         }
       } else {
-        if (isInstituteOwner || isAdmin) {
+        if ((institute && institute?.approvedByAdmin) || isAdmin) {
           return next();
         } else {
           return sendResponse(res, 400, {
