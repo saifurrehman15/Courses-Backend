@@ -27,7 +27,7 @@ class CoursesController {
 
   async show(req, res) {
     try {
-      const course = await courseService.findById({ id: req.params.id });
+      const course = await courseService.findOne({ _id: req.params.id });
       if (!course) {
         return sendResponse(res, 404, { error: true, message: "course not " });
       }
@@ -55,8 +55,8 @@ class CoursesController {
       const course = await courseService.create({
         createdBy: req.user.owner,
         body: value,
-        
       });
+      
       if (!course) {
         return sendResponse(res, 403, {
           error: true,

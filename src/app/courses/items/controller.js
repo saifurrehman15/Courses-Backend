@@ -8,6 +8,15 @@ import { validateSchema } from "./validate.js";
 class CoursesItemsController {
   async create(req, res) {
     try {
+      const instituteId = req.user?.owner;
+      
+      if (!instituteId) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "You didn't have access to this course!",
+        });
+      }
+
       const { error, value } = validateSchema.validate(req.body);
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
@@ -21,7 +30,10 @@ class CoursesItemsController {
         });
       }
 
-      const courseItem = await courseItemModel.create({ ...value });
+      const courseItem = await courseItemModel.create({
+        ...value,
+        institute: instituteId,
+      });
 
       return sendResponse(res, 201, {
         error: false,
