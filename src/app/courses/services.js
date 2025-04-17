@@ -20,6 +20,35 @@ class CourseService {
     );
   }
 
+  async findOwn({ page, limit, search, params }) {
+    const skip = (page - 1) * limit;
+    console.log(search);
+    let query = {};
+
+    if (search) {
+      query = {
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+    
+    query.createdBy = params.id;
+    const matchStage = search
+      ? {
+          $or: [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    return await courseModel.aggregate(
+      dbQueries.paginationQuery(matchStage, "courses", skip, limit, page)
+    );
+  }
+
   async findOne(query) {
     return await courseModel.findOne(query);
   }

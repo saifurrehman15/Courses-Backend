@@ -10,11 +10,13 @@ import { categoryController } from "../../courses/items-category/controller.js";
 const router = express.Router();
 
 // courses routes
-router.get("/courses", coursesController.index)
-router.post("/courses" , [authenticateUser,hasAccess] , coursesController.create)
-router.get("/courses/:id", coursesController.show)
-router.put("/courses/:id",  [authenticateUser, hasAccess ], coursesController.update)
-router.delete("/courses/:id", [authenticateUser, hasAccess ] , coursesController.delete)
+
+router.post("/courses" , [authenticateUser,hasAccess] , coursesController.create);
+router.get("/courses", coursesController.index);
+router.get("/courses/:id", coursesController.show);
+router.get("/institute-courses/:id", coursesController.findOwn);
+router.put("/courses/:id",  [authenticateUser, hasAccess ], coursesController.update);
+router.delete("/courses/:id", [authenticateUser, hasAccess ] , coursesController.delete);
 
 // courses categories routes
 router.post("/courses/category",[authenticateUser,hasAccess],categoryController.create);

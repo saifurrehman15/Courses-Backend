@@ -15,7 +15,30 @@ class CoursesController {
       return sendResponse(res, 200, {
         error: false,
         message: "Courses fetched successfully!",
-        data: courses,
+        data: courses[0],
+      });
+    } catch (err) {
+      return sendResponse(res, 500, {
+        error: true,
+        message: err.message || "Internal server error!",
+      });
+    }
+  }
+
+  async findOwn(req, res) {
+    const { limit = 10, page = 1, search = null } = req.query;
+    try {
+      const courses = await courseService.findOwn({
+        page: page,
+        limit: Number(limit),
+        search: search,
+        params: req.params,
+      });
+
+      return sendResponse(res, 200, {
+        error: false,
+        message: "Courses fetched successfully!",
+        data: courses[0],
       });
     } catch (err) {
       return sendResponse(res, 500, {
@@ -51,12 +74,11 @@ class CoursesController {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
 
-
       const course = await courseService.create({
         createdBy: req.user.owner,
         body: value,
       });
-      
+
       if (!course) {
         return sendResponse(res, 403, {
           error: true,
