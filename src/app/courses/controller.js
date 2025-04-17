@@ -28,6 +28,12 @@ class CoursesController {
   async findOwn(req, res) {
     const { limit = 10, page = 1, search = null } = req.query;
     try {
+      if (req.params.id === user?.institute?.instituteId) {
+        return sendResponse(res, 403, {
+          error: true,
+          message: "You don't have permission to access this course",
+        });
+      }
       const courses = await courseService.findOwn({
         page: page,
         limit: Number(limit),
