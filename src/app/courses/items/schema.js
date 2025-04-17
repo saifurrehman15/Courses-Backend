@@ -11,6 +11,11 @@ const CourseItemSchema = new Schema(
       ref: "categories",
       required: true,
     },
+    institute: {
+      type: mongoose.Types.ObjectId,
+      ref: "institutes",
+      required: true,
+    },
     url: { type: String, required: true },
     type: {
       type: String,

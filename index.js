@@ -32,6 +32,7 @@ app.use(passport.session());
 // Database connection
 connectDb();
 
+
 app.use("/api", authRoute);
 app.use("/api", userRoute);
 app.use("/api", courseRoute);

@@ -8,15 +8,25 @@ import {
   googleAuthenticate,
   logOut,
   refereshToken,
+  forgetPasswordController,
+  verifyOtpController,
+  
 } from "../../auth/auth-controller.js";
 
 const router = express.Router();
+
 
 // register
 router.post("/register", signUp);
 
 // login
 router.post("/login", login);
+
+// forget password
+router.post("/forget-password", forgetPasswordController);
+
+// verify otp
+router.post("/verify-otp",verifyOtpController)
 
 // google login
 router.get(

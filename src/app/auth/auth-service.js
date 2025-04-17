@@ -1,8 +1,10 @@
 import { userModel } from "../user/user-schema.js";
 import bcrypt from "bcryptjs";
 import token from "../helper/token-generate.js";
-import generateOTP from "../helper/generate_otp.js";
-import { Resend } from "resend";
+import generateOTP from "../helper/otp_generate.js";
+import { transporter } from "../../utils/node-mailer-config/index.js";
+import { otpModel } from "./otp-schema.js";
+import dayjs from "dayjs";
 
 // register service
 const registerService = async (value) => {
@@ -78,15 +80,96 @@ const forgetPasswordService = async (value) => {
   const checkUser = await userModel.findOne({ email: value.email });
 
   if (!checkUser) {
-    return { error: "User not found with this email!", status: 404 };
+    return { error: "User is not found with this email!", status: 404 };
   }
 
-  const otpGet = generateOTP();
-  const resend = new Resend();
+  let otp = generateOTP();
 
+  const info = await transporter.sendMail({
+    from: "Edu Master Support <saifrizwankhan786@gmail.com>",
+    to: checkUser.email,
+    subject: "Reset Your Password - OTP Inside",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+        <h2 style="color: #333;">Password Reset Request</h2>
+        <p>Hi ${checkUser.email.split("@")[0].replace(/\./g, "") || "there"},</p>
+        <p>We received a request to reset your password for your Edu Master account.</p>
+        <p>Please use the following One-Time Password (OTP) to proceed:</p>
+        <h1 style="background: #f2f2f2; padding: 10px 20px; display: inline-block; border-radius: 5px; color: #333;">
+          <strong>${otp}</strong>
+        </h1>
+        <p>This OTP is valid for 10 minutes. Do not share it with anyone.</p>
+        <p>If you did not request this, please ignore this email or contact our support.</p>
+        <br />
+        <p>Best regards,<br />The Acme Team</p>
+      </div>
+    `,
+  });
+
+  console.log("Message sent:", info.messageId);
+
+  if (!info) {
+    return { error: error.message, status: 403 };
+  }
+  let hashed = await bcrypt.hash(otp, 10);
+  let checkOtp = await otpModel.findOne({
+    email: value.email,
+    isExpire: false,
+  });
+
+  if (checkOtp) {
+    await otpModel.findOneAndUpdate(
+      { email: value.email },
+      { isExpire: true },
+      { $new: true }
+    );
+  }
   
+  await otpModel.create({ otp: hashed, email: value.email });
 
-  return checkUser;
+  return info;
 };
 
-export { registerService, loginService, googleService };
+const verifyOtpService = async (value) => {
+  const findOtpCode = await otpModel.findOne({
+    email: value.email,
+    isExpire: false,
+  });
+
+  if (!findOtpCode) {
+    return { error: "otp is expired", status: 404 };
+  }
+
+  const createdAt = dayjs(findOtpCode.createdAt);
+  const diff = dayjs().diff(createdAt, "minute");
+  console.log(diff);
+
+  if (diff > 10) {
+    console.log("hy");
+
+    await otpModel.findOneAndUpdate(
+      { email: value.email },
+      { isExpire: true },
+      { $new: true }
+    );
+
+    return { error: "otp is expired!", status: 403 };
+  }
+
+  const correctOtp = await bcrypt.compare(value.otp, findOtpCode.otp);
+
+  if (correctOtp) {
+    await otpModel.findOneAndUpdate({ otp: value.otp }, { isExpired: true });
+    return true;
+  } else {
+    return { error: "otp not matched!", status: 401 };
+  }
+};
+
+export {
+  registerService,
+  loginService,
+  googleService,
+  forgetPasswordService,
+  verifyOtpService,
+};

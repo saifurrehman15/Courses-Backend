@@ -20,8 +20,8 @@ class CourseService {
     );
   }
 
-  async findById({ id }) {
-    return await courseModel.findById(id);
+  async findOne(query) {
+    return await courseModel.findOne(query);
   }
 
   async create({ createdBy, body }) {

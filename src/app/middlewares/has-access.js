@@ -3,6 +3,7 @@ import { instituteService } from "../institute/services.js";
 import { studentServices } from "../student/services.js";
 import { categoryServices } from "../courses/items-category/services.js";
 import { courseItemModel } from "../courses/items/schema.js";
+import { courseService } from "../courses/services.js";
 
 const hasAccess = async (req, res, next) => {
   const user = req.user;
@@ -10,134 +11,135 @@ const hasAccess = async (req, res, next) => {
   const method = req.method;
   const isInstituteOwner = user?.owner;
   const isAdmin = user?.role === "admin";
-  console.log(isInstituteOwner);
-
-  const institute = await instituteService.findOne({
-    _id: isInstituteOwner,
-  });
-  console.log("hello", institute);
-
-  console.log(req.method);
+  const isReadOperation = method !== "POST";
 
   try {
+    const institute = await instituteService.findOne({ _id: isInstituteOwner });
+console.log(institute);
+
     if (route.includes("items")) {
-      if (method !== "POST") {
-        const items = await courseItemModel.findOne({ _id: req.params.id });
-        if (!items) {
-          return sendResponse(res, 404, {
-            error: true,
-            message: "Course category is not found!",
-          });
-        }
+      const item = await courseItemModel.findOne({ _id: req.params.id });
 
-        if ((institute && institute.approvedByAdmin) || isAdmin) {
-          return next();
-        } else {
-          return sendResponse(res, 400, {
-            error: true,
-            message: "You don't have access to this course!",
-          });
-        }
+      if (!item && isReadOperation) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "Course item not found!",
+        });
+      }
+
+      const hasAccess = isReadOperation
+        ? item?.institute.toString() === isInstituteOwner.toString()
+        : true;
+
+      if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
+        return next();
       } else {
-        if (!institute) {
-          return sendResponse(res, 403, {
-            error: true,
-            message: "You are not owned any Institute yet!",
-          });
-        }
-
-        if (!institute.approvedByAdmin) {
-          return sendResponse(res, 403, {
-            error: true,
-            message:
-              "Please wait until request will be accepted for registeration of institute!",
-          });
-        } else if (isAdmin || institute.approvedByAdmin) {
-          return next();
-        }
+        return sendResponse(res, 403, {
+          error: true,
+          message: "Access denied to course item.",
+        });
       }
     }
 
     if (route.includes("category")) {
-      if (method !== "POST") {
-        const category = await categoryServices.findOne({ _id: req.params.id });
-        if (!category) {
-          return sendResponse(res, 404, {
-            error: true,
-            message: "Course category is not found!",
-          });
-        }
+      const category = await categoryServices.findOne({ _id: req.params.id });
 
-        if ((institute && institute.approvedByAdmin) || isAdmin) {
-          return next();
-        } else {
-          return sendResponse(res, 400, {
-            error: true,
-            message: "You don't have access to this course!",
-          });
-        }
+      if (!category && isReadOperation) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "Course category not found!",
+        });
+      }
+
+      const hasAccess = isReadOperation
+        ? category?.institute.toString() === isInstituteOwner.toString()
+        : true;
+
+      if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
+        return next();
       } else {
-        if (!institute) {
-          return sendResponse(res, 403, {
-            error: true,
-            message: "You are not owned any Institute yet!",
-          });
-        }
-
-        if (!institute.approvedByAdmin) {
-          return sendResponse(res, 403, {
-            error: true,
-            message:
-              "Please wait until request will be accepted for registeration of institute!",
-          });
-        } else if (isAdmin || institute.approvedByAdmin) {
-          return next();
-        }
+        return sendResponse(res, 403, {
+          error: true,
+          message: "Access denied to course category.",
+        });
       }
     }
 
     if (route.includes("courses")) {
+      const course = await courseService.findOne({ _id: req.params.id });
+
+      if (!course && isReadOperation) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "Course not found!",
+        });
+      }
+
+      const hasAccess = isReadOperation
+        ? course?.createdBy.toString() === isInstituteOwner.toString()
+        : true;
+
+
+      if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
+        return next();
+      } else {
+        return sendResponse(res, 403, {
+          error: true,
+          message: "Access denied to course.",
+        });
+      }
+    }
+
+    if (route.includes("institute")) {
       if (method !== "POST") {
-        if (institute || isAdmin) {
+        const hasAccess =
+          (institute &&
+            institute.approvedByAdmin &&
+            req.params.id === isInstituteOwner) ||
+          isAdmin;
+
+        if (hasAccess) {
           return next();
         } else {
-          return sendResponse(res, 400, {
+          return sendResponse(res, 403, {
             error: true,
-            message: "You don't have access to this course!",
+            message: "Access denied to institute.",
           });
         }
       } else {
-        if (!institute) {
-          return sendResponse(res, 404, {
-            error: true,
-            message: "You don't have access to this course!",
-          });
-        }
-
-        if (!institute.approvedByAdmin) {
+        if ((institute && institute.approvedByAdmin) || isAdmin) {
+          return next();
+        } else {
           return sendResponse(res, 403, {
             error: true,
-            message:
-              "Please wait until request will be accepted for registeration of institute!",
+            message: "Access denied to create institute.",
           });
-        } else if (isAdmin || institute.approvedByAdmin) {
-          return next();
         }
       }
     }
 
-    // institute
-    if (route.includes("institute")) {
-      console.log(institute);
+    if (route.includes("application")) {
       if (method !== "POST") {
-        console.log("lorem", institute);
+        const application = await studentServices.findOne({
+          _id: req.params.id,
+        });
 
-        if ((institute && institute?.approvedByAdmin) || isAdmin) {
+        if (!application) {
+          return sendResponse(res, 404, {
+            error: true,
+            message: "Application not found!",
+          });
+        }
+
+        const hasAccess =
+          application?.institute.toString() === isInstituteOwner.toString();
+
+        if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
           return next();
         } else {
-          return sendResponse(res, 400, {
+          return sendResponse(res, 403, {
             error: true,
-            message: "You don't have access to this institute!",
+            message: "Access denied to application.",
           });
         }
       } else {
@@ -145,56 +147,9 @@ const hasAccess = async (req, res, next) => {
       }
     }
 
-    // applications
-    if (route.includes("application")) {
-      if (method !== "POST") {
-        if (method === "DELETE") {
-          const application = await studentServices.findOne({
-            _id: req.params.id,
-          });
-
-          const { institute, appliedBy } = application.toObject();
-
-          if (
-            institute.toString() === user?.institute?.instituteId?.toString()
-          ) {
-            req.messageSend =
-              "The application was suspended by your institute!";
-            return next();
-          } else if (appliedBy.toString() === user._id.toString()) {
-            req.messageSend =
-              "The application was successfully deleted by the user!";
-            return next();
-          } else {
-            return sendResponse(res, 400, {
-              error: true,
-              message: "You don't have access to this application!",
-            });
-          }
-        } else {
-          console.log("hello world!");
-
-          if ((institute && institute?.approvedByAdmin) || isAdmin) {
-            return next();
-          } else {
-            return sendResponse(res, 400, {
-              error: true,
-              message: "You don't have access to this application!",
-            });
-          }
-        }
-      } else {
-        if ((institute && institute?.approvedByAdmin) || isAdmin) {
-          return next();
-        } else {
-          return sendResponse(res, 400, {
-            error: true,
-            message: "You don't have access to this application!",
-          });
-        }
-      }
-    }
+    return next();
   } catch (error) {
+    console.error("Access control error:", error);
     return sendResponse(res, 500, {
       error: true,
       message: "Internal server error!",

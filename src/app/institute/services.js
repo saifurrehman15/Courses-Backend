@@ -64,7 +64,7 @@ class InstituteServices {
   }
 
   async updateDoc({ id, value }) {
-    return instituteModal.findByIdAndUpdate(id, value, { $new: true }).lean();
+    return await instituteModal.findByIdAndUpdate(id, { ...value }, { new: true }).lean();
   }
 
   async deleteDoc(id) {
