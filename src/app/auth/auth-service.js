@@ -165,7 +165,23 @@ const verifyOtpService = async (value) => {
 };
 
 const changePasswordService = async (value) => {
-  const changed= await userModel.findOneAndUpdate()
+  const changed = await userModel.findOne({ email: value.email });
+  if (!changed) {
+    return { error: "No user found with this email!", status: 404 };
+  }
+
+  const hashed = await bcrypt.hash(value.password, 10);
+
+  let updated = await userModel.findByIdAndUpdate(
+    changed._id,
+    { password: hashed },
+    { new: true }
+  );
+  if (updated) {
+    return { path: "password-changed/", status: 200 };
+  } else {
+    return { error: "Failed to changed password!", status: 403 };
+  }
 };
 
 export {
@@ -174,4 +190,5 @@ export {
   googleService,
   forgetPasswordService,
   verifyOtpService,
+  changePasswordService,
 };

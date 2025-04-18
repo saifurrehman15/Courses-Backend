@@ -10,11 +10,10 @@ import {
   refereshToken,
   forgetPasswordController,
   verifyOtpController,
-  
+  changePassword,
 } from "../../auth/auth-controller.js";
 
 const router = express.Router();
-
 
 // register
 router.post("/register", signUp);
@@ -25,8 +24,11 @@ router.post("/login", login);
 // forget password
 router.post("/forget-password", forgetPasswordController);
 
+// change password
+router.post("/change-password", changePassword);
+
 // verify otp
-router.post("/verify-otp",verifyOtpController)
+router.post("/verify-otp", verifyOtpController);
 
 // google login
 router.get(

@@ -5,6 +5,7 @@ import {
   googleService,
   forgetPasswordService,
   verifyOtpService,
+  changePasswordService,
 } from "./auth-service.js";
 
 import { validateSchema } from "../user/user-validate.js";
@@ -177,14 +178,40 @@ const verifyOtpController = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
-  let validatePass = Joi.object({
-    password: Joi.string().length(6).required(),
-  });
+  try {
+    let validatePass = Joi.object({
+      password: Joi.string().length(6).required(),
+      email: Joi.string().email().required(),
+    });
+    console.log("hy", req.body);
 
-  const { error, value } = validatePass.validate(req.body);
+    const { error, value } = validatePass.validate(req.body);
 
-  if (error) {
-    return sendResponse(re)
+    if (error) {
+      return sendResponse(res, 400, { error: true, message: error.message });
+    }
+
+    const service = await changePasswordService(value);
+    console.log("service", service);
+
+    if (service?.error) {
+      return sendResponse(res, service.status, {
+        error: true,
+        message: service.error,
+      });
+    }
+
+    return sendResponse(res, service.status, {
+      error: true,
+      message: "successfully changed password!",
+      redirect: service.path,
+    });
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, service.status, {
+      error: true,
+      message: "Internal server error!",
+    });
   }
 };
 
