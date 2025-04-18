@@ -124,7 +124,7 @@ const forgetPasswordService = async (value) => {
       { $new: true }
     );
   }
-  
+
   await otpModel.create({ otp: hashed, email: value.email });
 
   return info;
@@ -147,11 +147,7 @@ const verifyOtpService = async (value) => {
   if (diff > 10) {
     console.log("hy");
 
-    await otpModel.findOneAndUpdate(
-      { email: value.email },
-      { isExpire: true },
-      { $new: true }
-    );
+    await otpModel.findOneAndDelete({ email: value.email });
 
     return { error: "otp is expired!", status: 403 };
   }
@@ -159,11 +155,17 @@ const verifyOtpService = async (value) => {
   const correctOtp = await bcrypt.compare(value.otp, findOtpCode.otp);
 
   if (correctOtp) {
-    await otpModel.findOneAndUpdate({ otp: value.otp }, { isExpired: true });
+    console.log("hy");
+
+    await otpModel.findOneAndDelete({ email: value.email });
     return true;
   } else {
     return { error: "otp not matched!", status: 401 };
   }
+};
+
+const changePasswordService = async (value) => {
+  const changed= await userModel.findOneAndUpdate()
 };
 
 export {

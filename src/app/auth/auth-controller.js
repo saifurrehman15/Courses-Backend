@@ -176,6 +176,18 @@ const verifyOtpController = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  let validatePass = Joi.object({
+    password: Joi.string().length(6).required(),
+  });
+
+  const { error, value } = validatePass.validate(req.body);
+
+  if (error) {
+    return sendResponse(re)
+  }
+};
+
 export {
   signUp,
   login,
@@ -184,4 +196,5 @@ export {
   refereshToken,
   forgetPasswordController,
   verifyOtpController,
+  changePassword,
 };
