@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { dbQueries } from "../../utils/db/queries.js";
 import { courseModel } from "./schema.js";
 
@@ -33,19 +34,13 @@ class CourseService {
         ],
       };
     }
-    
-    query.createdBy = params.id;
-    const matchStage = search
-      ? {
-          $or: [
-            { title: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
-          ],
-        }
-      : {};
 
+    query.createdBy = new mongoose.Types.ObjectId(params.id);
+    console.log(query);
+
+  
     return await courseModel.aggregate(
-      dbQueries.paginationQuery(matchStage, "courses", skip, limit, page)
+      dbQueries.paginationQuery(query, "courses", skip, limit, page)
     );
   }
 
