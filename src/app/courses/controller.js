@@ -32,7 +32,7 @@ class CoursesController {
       if (req.params.id !== user?.institute?.instituteId) {
         return sendResponse(res, 403, {
           error: true,
-          message: "You don't have permission to access this course",
+          message: "You don't have permission to access this course!",
         });
       }
 
