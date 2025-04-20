@@ -26,27 +26,22 @@ class CourseService {
       query.category = category;
     }
 
-    const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
+    // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
 
-    try {
-      const cachedData = await client.get(cacheKey);
+    //   const cachedData = await client.get(cacheKey);
 
-      if (cachedData) {
-        console.log("Data served from Redis cache");
-        return JSON.parse(cachedData);
-      }
+    //   if (cachedData) {
+    //     console.log("Data served from Redis cache");
+    //     return JSON.parse(cachedData);
+    //   }
 
       const result = await courseModel.aggregate(
         dbQueries.paginationQuery(query, "courses", skip, limit, page)
       );
 
-      await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
+      // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
 
       return result;
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      throw new Error("Failed to fetch courses.");
-    }
   }
 
   async findOwn({ page, limit, search, params }) {
