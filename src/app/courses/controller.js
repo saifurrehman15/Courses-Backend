@@ -4,13 +4,24 @@ import { updateSchema, validateSchema } from "./validate.js";
 import { courseService } from "./services.js";
 class CoursesController {
   async index(req, res) {
-    const { limit = 10, page = 1, search = null } = req.query;
+    const {
+      limit = 10,
+      page = 1,
+      search = null,
+      featured = false,
+      category = "",
+    } = req.query;
     try {
       const courses = await courseService.find({
-        page: page,
+        page,
         limit: Number(limit),
-        search: search,
+        search,
+        featured,
+        category,
       });
+
+      console.log(courses);
+      
 
       return sendResponse(res, 200, {
         error: false,

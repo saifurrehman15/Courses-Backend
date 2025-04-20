@@ -1,29 +1,57 @@
 import mongoose from "mongoose";
 import { dbQueries } from "../../utils/db/queries.js";
 import { courseModel } from "./schema.js";
+import { client, connectRedis } from "../../utils/configs/redis/index.js";
 
 class CourseService {
-  async find({ page, limit, search }) {
+  async find({ page, limit, search, featured, category }) {
+    await connectRedis();
+
     const skip = (page - 1) * limit;
-    console.log(search);
+    let query = {};
 
-    const matchStage = search
-      ? {
-          $or: [
-            { title: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
-          ],
-        }
-      : {};
+    // Build query
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
 
-    return await courseModel.aggregate(
-      dbQueries.paginationQuery(matchStage, "courses", skip, limit, page)
-    );
+    if (featured) {
+      query.featured = JSON.parse(featured);
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
+
+    try {
+      const cachedData = await client.get(cacheKey);
+
+      if (cachedData) {
+        console.log("Data served from Redis cache");
+        return JSON.parse(cachedData);
+      }
+
+      const result = await courseModel.aggregate(
+        dbQueries.paginationQuery(query, "courses", skip, limit, page)
+      );
+
+      await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      throw new Error("Failed to fetch courses.");
+    }
   }
 
   async findOwn({ page, limit, search, params }) {
     const skip = (page - 1) * limit;
-    console.log(search);
+
     let query = {};
 
     if (search) {
@@ -36,12 +64,24 @@ class CourseService {
     }
 
     query.createdBy = new mongoose.Types.ObjectId(params.id);
-    console.log(query);
 
-  
-    return await courseModel.aggregate(
+    const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
+    const dataGet = await client.get(cacheKey);
+    console.log("dataa=>>>", dataGet);
+
+    if (dataGet) {
+      console.log("Data from redis===>", dataGet);
+
+      return JSON.parse(dataGet);
+    }
+
+    const getCourse = await courseModel.aggregate(
       dbQueries.paginationQuery(query, "courses", skip, limit, page)
     );
+
+    await client.set(cacheKey, JSON.stringify(getCourse), "EX", 60 * 60 * 24);
+
+    return getCourse;
   }
 
   async findOne(query) {

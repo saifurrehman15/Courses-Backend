@@ -2,7 +2,7 @@ import { userModel } from "../user/user-schema.js";
 import bcrypt from "bcryptjs";
 import token from "../helper/token-generate.js";
 import generateOTP from "../helper/otp_generate.js";
-import { transporter } from "../../utils/node-mailer-config/index.js";
+import { transporter } from "../../utils/configs/node-mailer-config/index.js";
 import { otpModel } from "./otp-schema.js";
 import dayjs from "dayjs";
 
@@ -31,13 +31,13 @@ const registerService = async (value) => {
 const loginService = async (value) => {
   const userExist = await userModel.findOne({ email: value.email });
 
-  if (!userExist) return null;
+  if (!userExist) return { error: "user is not exist!", status: 404 };
 
   let checkPassword;
 
   if (userExist.provider !== "google") {
     checkPassword = await bcrypt.compare(value.password, userExist.password);
-    if (!checkPassword) return null;
+    if (!checkPassword) return { error: "Invalid credientials!", status: 400 };
   }
 
   let objWithoutPass = userExist.toObject();
@@ -86,27 +86,25 @@ const forgetPasswordService = async (value) => {
   let otp = generateOTP();
 
   const info = await transporter.sendMail({
-    from: "Saif ki Shadi ki Appeal ❤️ <saifrizwankhan786@gmail.com>",
+    from: "Edu Master Support <saifrizwankhan786@gmail.com>",
     to: checkUser.email,
-    subject: "Zindagi ka naya safar shuru karne ki darkhwast 💍",
+    subject: "Reset Your Password - OTP Inside",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-        <h2 style="color: #333;">Mummy, meri ek choti si request hai...</h2>
-        <p>Dear ${checkUser.email.split("@")[0].replace(/\./g, "") || "meri mummy"},</p>
-        <p>Jab se hosh sambhala hai, ek hi khwaab dekha hai... shaadi ka 😅</p>
-        <p>Ab waqt aa gaya hai ke aap meri is choti si khushi ko pura karein.</p>
-        <p>Iss safar ki shuruaat ke liye niche diya gaya OTP use karein:</p>
+        <h2 style="color: #333;">Password Reset Request</h2>
+        <p>Hi ${checkUser.email.split("@")[0].replace(/\./g, "") || "there"},</p>
+        <p>We received a request to reset your password for your Edu Master account.</p>
+        <p>Please use the following One-Time Password (OTP) to proceed:</p>
         <h1 style="background: #f2f2f2; padding: 10px 20px; display: inline-block; border-radius: 5px; color: #333;">
           <strong>${otp}</strong>
         </h1>
-        <p>OTP sirf 10 minutes ke liye valid hai. Kisi aur ko batana mana hai 🙊</p>
-        <p>Agar aapne yeh request nahi ki, toh mummy please mujhe maaf kardein 🙈</p>
+        <p>This OTP is valid for 10 minutes. Do not share it with anyone.</p>
+        <p>If you did not request this, please ignore this email or contact our support.</p>
         <br />
-        <p>Hamesha aapka beta,<br />Saif 💕</p>
+        <p>Best regards,<br />The Acme Team</p>
       </div>
     `,
   });
-  
 
   console.log("Message sent:", info.messageId);
 

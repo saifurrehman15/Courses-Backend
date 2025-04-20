@@ -8,7 +8,7 @@ import {
   changePasswordService,
 } from "./auth-service.js";
 
-import { validateSchema } from "../user/user-validate.js";
+import { loginSchema, validateSchema } from "../user/user-validate.js";
 import token from "../helper/token-generate.js";
 import Joi from "joi";
 
@@ -42,7 +42,7 @@ const signUp = async (req, res) => {
 
 // login controller
 const login = async (req, res) => {
-  const { error, value } = validateSchema.validate(req.body);
+  const { error, value } = loginSchema.validate(req.body);
 
   if (error) {
     sendResponse(res, 400, { error: true, message: error.message });
@@ -50,8 +50,11 @@ const login = async (req, res) => {
 
   const loginServiceGet = await loginService(value);
 
-  if (!loginServiceGet) {
-    sendResponse(res, 404, { error: true, message: "The User is not exist!" });
+  if (loginServiceGet.error) {
+    sendResponse(res, loginServiceGet.status, {
+      error: true,
+      message: loginServiceGet.error,
+    });
   }
 
   sendResponse(res, 200, {

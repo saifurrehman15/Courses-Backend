@@ -10,6 +10,8 @@ import studentRoute from "./src/app/routes/student/index.js";
 import fileRoute from "./src/app/routes/upload-files/index.js";
 import passport from "./src/utils/passport-utils/passport-util.js";
 import session from "express-session";
+import cron from "node-cron";
+import { client } from "./src/utils/configs/redis/index.js";
 
 const app = express();
 const port = process.env.PORT;
@@ -32,13 +34,18 @@ app.use(passport.session());
 // Database connection
 connectDb();
 
-
 app.use("/api", authRoute);
 app.use("/api", userRoute);
 app.use("/api", courseRoute);
 app.use("/api", instituteRoutes);
 app.use("/api", studentRoute);
 app.use("/api", fileRoute);
+
+cron.schedule("0 2 * * *", async () => {
+  await client.flushDb();
+  console.log("Redis cache cleared at 2 AM");
+});
+
 
 app.get("/", (req, res) => {
   res.send("Server is running on port " + port);

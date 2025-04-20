@@ -2,7 +2,7 @@ import {
   cloud_config,
   cloudinary,
   Readable,
-} from "../../utils/cloudinary-config/index.js";
+} from "../../utils//configs/cloudinary-config/index.js";
 
 class FileService {
   upload(file, fileName, type = "image") {
