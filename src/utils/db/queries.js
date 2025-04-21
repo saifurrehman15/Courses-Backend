@@ -7,7 +7,19 @@ class Queries {
       {
         $facet: {
           metadata: [{ $count: "total" }],
-          [data]: [{ $skip: skipsOffset }, { $limit: limitsInNumber }],
+          [data]: [
+            { $skip: skipsOffset },
+            { $limit: limitsInNumber },
+            {
+              $lookup: {
+                from: "institutes",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "createdBy",
+              },
+            },
+            { $unwind: "$createdBy" },
+          ],
         },
       },
       {

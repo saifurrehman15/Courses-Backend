@@ -35,13 +35,16 @@ class CourseService {
     //     return JSON.parse(cachedData);
     //   }
 
-      const result = await courseModel.aggregate(
-        dbQueries.paginationQuery(query, "courses", skip, limit, page)
-      );
+    const result = await courseModel.aggregate(
+      dbQueries.paginationQuery(query, "courses", skip, limit, page)
+    );
 
-      // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
+    console.log(result);
+    
 
-      return result;
+    // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
+
+    return result;
   }
 
   async findOwn({ page, limit, search, params }) {
