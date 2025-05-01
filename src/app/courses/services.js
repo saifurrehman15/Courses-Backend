@@ -10,7 +10,6 @@ class CourseService {
     const skip = (page - 1) * limit;
     let query = {};
 
-    // Build query
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -39,9 +38,6 @@ class CourseService {
       dbQueries.paginationQuery(query, "courses", skip, limit, page)
     );
 
-    console.log(result);
-    
-
     // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
 
     return result;
@@ -49,6 +45,7 @@ class CourseService {
 
   async findOwn({ page, limit, search, params }) {
     const skip = (page - 1) * limit;
+    console.log(params);
 
     let query = {};
 
@@ -63,21 +60,21 @@ class CourseService {
 
     query.createdBy = new mongoose.Types.ObjectId(params.id);
 
-    const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
-    const dataGet = await client.get(cacheKey);
-    console.log("dataa=>>>", dataGet);
+    // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
+    // const dataGet = await client.get(cacheKey);
+    // console.log("dataa=>>>", dataGet);
 
-    if (dataGet) {
-      console.log("Data from redis===>", dataGet);
+    // if (dataGet) {
+    //   console.log("Data from redis===>", dataGet);
 
-      return JSON.parse(dataGet);
-    }
+    //   return JSON.parse(dataGet);
+    // }
 
     const getCourse = await courseModel.aggregate(
       dbQueries.paginationQuery(query, "courses", skip, limit, page)
     );
 
-    await client.set(cacheKey, JSON.stringify(getCourse), "EX", 60 * 60 * 24);
+    // await client.set(cacheKey, JSON.stringify(getCourse), "EX", 60 * 60 * 24);
 
     return getCourse;
   }

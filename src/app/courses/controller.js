@@ -1,4 +1,3 @@
-import { courseModel } from "./schema.js";
 import sendResponse from "../helper/response-sender.js";
 import { updateSchema, validateSchema } from "./validate.js";
 import { courseService } from "./services.js";
@@ -7,7 +6,7 @@ class CoursesController {
     const {
       limit = 10,
       page = 1,
-      search = null,
+      search = "",
       featured = false,
       category = "",
     } = req.query;
@@ -21,7 +20,6 @@ class CoursesController {
       });
 
       console.log(courses);
-      
 
       return sendResponse(res, 200, {
         error: false,
@@ -37,10 +35,14 @@ class CoursesController {
   }
 
   async findOwn(req, res) {
-    const { limit = 10, page = 1, search = null } = req.query;
+    const { limit = 10, page = 1, search = "" } = req.query;
     try {
       let user = req.user;
-      if (req.params.id !== user?.institute?.instituteId) {
+
+      if (
+        req.params.id !==
+        (user?.institute?.instituteId.toString() || user?.owner.toString())
+      ) {
         return sendResponse(res, 403, {
           error: true,
           message: "You don't have permission to access this course!",

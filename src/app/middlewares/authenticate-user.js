@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 const authenticateUser = async (req, res, next) => {
   try {
-    const tokenProvided = req.header("Authorization");
+    const tokenProvided = req.headers.authorization;
 
     if (!tokenProvided) {
       sendResponse(res, 400, {
@@ -21,9 +21,8 @@ const authenticateUser = async (req, res, next) => {
       sendResponse(res, 403, { error: true, message: "Token is expired!" });
     }
 
-
     const findUser = await userModel.findById(decoded._id).lean();
-    
+
     if (!findUser) {
       sendResponse(res, 404, { error: true, message: "User not found!" });
     }
@@ -32,7 +31,6 @@ const authenticateUser = async (req, res, next) => {
 
     next();
   } catch (error) {
-
     sendResponse(res, 500, {
       error: true,
       message: error || "Internal server error!",
