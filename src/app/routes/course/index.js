@@ -14,7 +14,7 @@ const router = express.Router();
 router.post("/courses" , [authenticateUser,hasAccess] , coursesController.create);
 router.get("/courses", coursesController.index);
 router.get("/courses/:id", coursesController.show);
-router.get("/institute-courses/:id", authenticateUser, coursesController.findOwn);
+router.get("/institute-courses/:id",authenticateUser, coursesController.findOwn);
 router.put("/courses/:id",  [authenticateUser, hasAccess ], coursesController.update);
 router.delete("/courses/:id", [authenticateUser, hasAccess ] , coursesController.delete);
 

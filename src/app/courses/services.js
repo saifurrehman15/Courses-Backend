@@ -38,12 +38,14 @@ class CourseService {
       dbQueries.paginationQuery(query, "courses", skip, limit, page)
     );
 
+    console.log(result);
+
     // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
 
     return result;
   }
 
-  async findOwn({ page, limit, search, params }) {
+  async findOwn({ page, limit, search, params, featured, category }) {
     const skip = (page - 1) * limit;
     console.log(params);
 

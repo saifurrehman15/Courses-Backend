@@ -9,7 +9,7 @@ class Queries {
           metadata: [{ $count: "total" }],
           [data]: [
             { $skip: skipsOffset },
-            { $limit: limitsInNumber }
+            { $limit: limitsInNumber },
             // {
             //   $lookup: {
             //     from: "institutes",

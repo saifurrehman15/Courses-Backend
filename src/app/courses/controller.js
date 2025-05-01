@@ -35,14 +35,19 @@ class CoursesController {
   }
 
   async findOwn(req, res) {
-    const { limit = 10, page = 1, search = "" } = req.query;
+    const {
+      limit = 10,
+      page = 1,
+      search = "",
+      featured = "",
+      category = "",
+    } = req.query;
     try {
       let user = req.user;
+      let idsCheck = user?.institute?.instituteId || user?.owner;
+      console.log(user?.institute?.instituteId, user);
 
-      if (
-        req.params.id !==
-        (user?.institute?.instituteId.toString() || user?.owner.toString())
-      ) {
+      if (req.params.id !== idsCheck.toString()) {
         return sendResponse(res, 403, {
           error: true,
           message: "You don't have permission to access this course!",
@@ -54,6 +59,8 @@ class CoursesController {
         limit: Number(limit),
         search: search,
         params: req.params,
+        featured,
+        category,
       });
 
       return sendResponse(res, 200, {
