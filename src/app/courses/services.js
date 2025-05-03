@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { dbQueries } from "../../utils/db/queries.js";
 import { courseModel } from "./schema.js";
 import { client, connectRedis } from "../../utils/configs/redis/index.js";
+import {
+  cloudinary,
+  cloud_config,
+} from "../../utils/configs/cloudinary-config/index.js";
 
 class CourseService {
   async find({ page, limit, search, featured, category }) {
@@ -35,7 +39,16 @@ class CourseService {
     //   }
 
     const result = await courseModel.aggregate(
-      dbQueries.paginationQuery(query, "courses", skip, limit, page)
+      dbQueries.paginationQuery(
+        query,
+        "courses",
+        skip,
+        limit,
+        page,
+        "institutes",
+        true,
+        "createdBy"
+      )
     );
 
     console.log(result);
@@ -94,7 +107,20 @@ class CourseService {
   }
 
   async delete({ id }) {
-    await courseModel.findByIdAndDelete(id);
+    const res = await courseModel.findByIdAndDelete(id);
+    if (!res) return null;
+
+
+    cloud_config();
+
+    const imageUrl = res.image;
+    let publicId = imageUrl.split("/");
+    publicId = publicId[publicId.length - 1].split(".")[0];
+    console.log("Image=>>>>", publicId);
+
+    await cloudinary.uploader.destroy(publicId);
+
+    return res;
   }
 }
 

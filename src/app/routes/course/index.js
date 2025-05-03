@@ -3,8 +3,9 @@ import { coursesController } from "../../courses/controller.js";
 import authenticateUser from "../../middlewares/authenticate-user.js";
 import hasAccess from "../../middlewares/has-access.js";
 
-import { coursesItemsController } from "../../courses/items/controller.js";
-import { categoryController } from "../../courses/items-category/controller.js";
+import { coursesItemsController } from "../../courses/course-materials/controller.js";
+import { categoryController } from "../../courses/course-items/controller.js";
+import categoryListController from "../../courses/categories/controller.js";
 
 
 const router = express.Router();
@@ -24,6 +25,13 @@ router.get("/courses/category/:id",categoryController.findAll);
 router.get("/courses/single-category/:id",categoryController.findOne);
 router.put("/courses/category/:id",[authenticateUser,hasAccess],categoryController.update);
 router.delete("/courses/category/:id",[authenticateUser,hasAccess],categoryController.delete);
+
+
+// category 
+router.post("/create-category",[authenticateUser,hasAccess], categoryListController.create);
+router.get("/categories", categoryListController.getAll);
+router.put("/update-category",[authenticateUser,hasAccess], categoryListController.update);
+router.delete("/delete-category/:id",[authenticateUser,hasAccess], categoryListController.delete);
 
 
 // courses items routes

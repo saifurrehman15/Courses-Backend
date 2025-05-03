@@ -14,4 +14,4 @@ const CategorySchema = new Schema(
 );
 
 export const itemsCategoryModal =
-  mongoose.models.categories || mongoose.model("categories", CategorySchema);
+  mongoose.models.course_items || mongoose.model("course_items", CategorySchema);

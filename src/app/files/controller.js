@@ -4,7 +4,7 @@ import { fileService } from "./service.js";
 class Files {
   async uploadFile(req, res) {
     try {
-      console.log(req.file);
+      console.log("file from frontend!",req.file);
       const { file } = req;
       const fileName = file.originalname.split(".")[0];
       const mimetype = file.mimetype;

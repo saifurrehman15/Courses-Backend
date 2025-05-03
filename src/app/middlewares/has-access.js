@@ -1,8 +1,8 @@
 import sendResponse from "../helper/response-sender.js";
 import { instituteService } from "../institute/services.js";
 import { studentServices } from "../student/services.js";
-import { categoryServices } from "../courses/items-category/services.js";
-import { courseItemModel } from "../courses/items/schema.js";
+import { categoryServices } from "../courses/course-items/services.js";
+import { courseItemModel } from "../courses/course-materials/schema.js";
 import { courseService } from "../courses/services.js";
 
 const hasAccess = async (req, res, next) => {
@@ -15,7 +15,6 @@ const hasAccess = async (req, res, next) => {
 
   try {
     const institute = await instituteService.findOne({ _id: isInstituteOwner });
-console.log(institute);
 
     if (route.includes("items")) {
       const item = await courseItemModel.findOne({ _id: req.params.id });
@@ -78,7 +77,6 @@ console.log(institute);
       const hasAccess = isReadOperation
         ? course?.createdBy.toString() === isInstituteOwner.toString()
         : true;
-
 
       if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
         return next();
@@ -144,6 +142,18 @@ console.log(institute);
         }
       } else {
         return next();
+      }
+    }
+
+    if (route.includes("categories")) {
+      if (isAdmin) {
+        return next();
+      } else {
+        return sendResponse(res, 403, {
+          error: true,
+          message:
+            "Only admin have access to create, update and delete categories!",
+        });
       }
     }
 

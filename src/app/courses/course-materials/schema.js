@@ -29,5 +29,5 @@ const CourseItemSchema = new Schema(
   }
 );
 export const courseItemModel =
-  mongoose.models.courses_items ||
-  mongoose.model("courses_items", CourseItemSchema);
+  mongoose.models.course_materials ||
+  mongoose.model("course=_materials", CourseItemSchema);

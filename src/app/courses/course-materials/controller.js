@@ -1,5 +1,5 @@
 import sendResponse from "../../helper/response-sender.js";
-import { itemsCategoryModal } from "../items-category/schema.js";
+import { itemsCategoryModal } from "../course-items/schema.js";
 import { courseItemModel } from "./schema.js";
 import { courseItemsService } from "./services.js";
 

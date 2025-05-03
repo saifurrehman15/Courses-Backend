@@ -1,5 +1,28 @@
 class Queries {
-  paginationQuery(query, data, skipsOffset, limitsInNumber, page) {
+  paginationQuery(
+    query,
+    data,
+    skipsOffset,
+    limitsInNumber,
+    page,
+    ref = "",
+    populate = false,
+    keyPopulated = ""
+  ) {
+    let populated = populate
+      ? [
+          {
+            $lookup: {
+              from: ref,
+              localField: keyPopulated,
+              foreignField: "_id",
+              as: keyPopulated,
+            },
+          },
+          { $unwind: `$${keyPopulated}` },
+        ]
+      : [];
+
     return [
       {
         $match: query,
@@ -10,15 +33,7 @@ class Queries {
           [data]: [
             { $skip: skipsOffset },
             { $limit: limitsInNumber },
-            // {
-            //   $lookup: {
-            //     from: "institutes",
-            //     localField: "createdBy",
-            //     foreignField: "_id",
-            //     as: "createdBy",
-            //   },
-            // },
-            // { $unwind: "$createdBy" },
+            ...populated,
           ],
         },
       },
