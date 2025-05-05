@@ -28,6 +28,7 @@ class CourseService {
     if (category) {
       query.category = category;
     }
+console.log("query",query);
 
     // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
 

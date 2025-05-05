@@ -9,7 +9,7 @@ class CoursesItemsController {
   async create(req, res) {
     try {
       const instituteId = req.user?.owner;
-      
+
       if (!instituteId) {
         return sendResponse(res, 404, {
           error: true,
@@ -52,9 +52,11 @@ class CoursesItemsController {
     const { limit = 10, page = 1, search = null } = req.query;
     try {
       const courseId = req.params.id;
-      console.log(courseId);
+      console.log("Course Id===>>>", courseId);
 
-      const courseExists = await itemsCategoryModal.findById(courseId);
+      const courseExists = await itemsCategoryModal.findOne({
+        $or: [{ course: courseId }, { institute: courseId }, { _id: courseId }],
+      });
       console.log(courseExists);
 
       if (!courseExists) {
@@ -70,6 +72,8 @@ class CoursesItemsController {
         limit: Number(limit),
         search: search,
       });
+      console.log("Course Items", courseItems);
+
       return sendResponse(res, 200, {
         error: false,
         message: "Course items fetched successfully!",

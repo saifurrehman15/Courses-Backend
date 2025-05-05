@@ -11,6 +11,8 @@ class CoursesController {
       category = "",
     } = req.query;
     try {
+      console.log(category);
+      
       const courses = await courseService.find({
         page,
         limit: Number(limit),
@@ -45,7 +47,7 @@ class CoursesController {
     try {
       let user = req.user;
       let idsCheck = user?.institute?.instituteId || user?.owner;
-      console.log(user?.institute?.instituteId, user);
+      console.log(user?.institute?.instituteId, user,category);
 
       if (req.params.id !== idsCheck.toString()) {
         return sendResponse(res, 403, {

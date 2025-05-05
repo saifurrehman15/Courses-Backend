@@ -41,7 +41,11 @@ const hasAccess = async (req, res, next) => {
     }
 
     if (route.includes("category")) {
-      const category = await categoryServices.findOne({ _id: req.params.id });
+      const paramId = req.params.id;
+      const query = {
+        $or: [{ _id: paramId }, { course: paramId }, { institute: paramId }],
+      };
+      const category = await categoryServices.findOne(query);
 
       if (!category && isReadOperation) {
         return sendResponse(res, 404, {
@@ -51,8 +55,11 @@ const hasAccess = async (req, res, next) => {
       }
 
       const hasAccess = isReadOperation
-        ? category?.institute.toString() === isInstituteOwner.toString()
-        : true;
+        ? category?.institute.toString() === isInstituteOwner.toString() ||
+          category?.institute.toString() ===
+            user?.institute?.instituteId.toString()
+        : req.body.institute === isInstituteOwner.toString();
+console.log("accessed",hasAccess,req.body.institute);
 
       if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
         return next();

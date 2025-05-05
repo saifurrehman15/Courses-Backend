@@ -9,6 +9,8 @@ class Queries {
     populate = false,
     keyPopulated = ""
   ) {
+    console.log(populate,ref,keyPopulated);
+    
     let populated = populate
       ? [
           {
@@ -61,6 +63,7 @@ class Queries {
           },
         },
       },
+      
     ];
   }
 }

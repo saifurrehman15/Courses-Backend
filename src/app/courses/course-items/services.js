@@ -4,7 +4,7 @@ import { itemsCategoryModal } from "./schema.js";
 
 class CategoryServices {
   async create({ value, institute }) {
-    console.log(institute,{
+    console.log(institute, {
       ...value,
       institute: institute.toString(),
     });
@@ -39,7 +39,10 @@ class CategoryServices {
     }
     console.log(query);
 
-    query.course = new mongoose.Types.ObjectId(param.id);
+    query.$or = [
+      { course: new mongoose.Types.ObjectId(param.id) },
+      { institute: new mongoose.Types.ObjectId(param.id) },
+    ];
 
     console.log(query);
     const datas = await itemsCategoryModal.aggregate(
@@ -48,7 +51,10 @@ class CategoryServices {
         "category",
         skipsOffset,
         limitsInNumber,
-        page
+        page,
+        "courses",
+        true,
+        "course"
       )
     );
 

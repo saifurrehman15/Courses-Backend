@@ -8,7 +8,7 @@ const CourseItemSchema = new Schema(
     description: { type: String, required: true },
     category: {
       type: mongoose.Types.ObjectId,
-      ref: "categories",
+      ref: "course_items",
       required: true,
     },
     institute: {
@@ -20,8 +20,8 @@ const CourseItemSchema = new Schema(
     type: {
       type: String,
       required: true,
-      default: "video ",
-      enums: ["video", "pdfs", "word"],
+      default: "video",
+      enums: ["video", "pdf", "word"],
     },
   },
   {
@@ -30,4 +30,4 @@ const CourseItemSchema = new Schema(
 );
 export const courseItemModel =
   mongoose.models.course_materials ||
-  mongoose.model("course=_materials", CourseItemSchema);
+  mongoose.model("course_materials", CourseItemSchema);

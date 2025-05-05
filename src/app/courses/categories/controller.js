@@ -1,10 +1,11 @@
 import Joi from "joi";
 import { categoryModel } from "./schema.js";
+import { client, connectRedis } from "../../../utils/configs/redis/index.js";
 
 class CategoriesController {
   async create(req, res) {
     const schema = Joi.object({
-      name: Joi.string().min(3).required(),
+      title: Joi.string().min(3).required(),
     });
 
     const { error, value } = schema.validate(req.body);
@@ -15,14 +16,14 @@ class CategoriesController {
     }
 
     try {
-      const existing = await categoryModel.findOne({ name: value.name });
+      const existing = await categoryModel.findOne({ name: value.title });
       if (existing) {
         return res
           .status(400)
           .json({ error: true, message: "Category already exists." });
       }
 
-      const newCategory = await categoryModel.create({ name: value.name });
+      const newCategory = await categoryModel.create({ title: value.title });
       return res
         .status(201)
         .json({ error: false, message: "Category created", data: newCategory });
@@ -35,7 +36,24 @@ class CategoriesController {
 
   async getAll(req, res) {
     try {
+      await connectRedis();
+
+      const data = await client.get("categories");
+      if (data) {
+        console.log("categories get from redis", data);
+        return res
+          .status(200)
+          .json({ error: false, data: { category: JSON.parse(data) } });
+      }
+      
       const categories = await categoryModel.find().sort({ createdAt: -1 });
+      
+      await client.set("categories", JSON.stringify(categories), {
+        EX: 60 * 60 * 24, 
+      });
+      
+      console.log("categories set to redis");
+      
       return res
         .status(200)
         .json({ error: false, data: { category: categories } });
@@ -66,7 +84,7 @@ class CategoriesController {
 
   async update(req, res) {
     const schema = Joi.object({
-      name: Joi.string().min(3).required(),
+      title: Joi.string().min(3).required(),
     });
 
     const { error } = schema.validate(req.body);
@@ -79,7 +97,7 @@ class CategoriesController {
     try {
       const updated = await categoryModel.findByIdAndUpdate(
         req.params.id,
-        { name: req.body.name },
+        { title: req.body.title },
         { new: true }
       );
 
@@ -100,5 +118,5 @@ class CategoriesController {
   }
 }
 
-const categoryListController = new CategoriesController();
-export default categoryListController;
+const courseListController = new CategoriesController();
+export default courseListController;
