@@ -3,7 +3,7 @@ import { itemsCategoryModal } from "../course-items/schema.js";
 import { courseItemModel } from "./schema.js";
 import { courseItemsService } from "./services.js";
 
-import { validateSchema } from "./validate.js";
+import { validateSchema, validateSchemaUpdate } from "./validate.js";
 
 class CoursesItemsController {
   async create(req, res) {
@@ -91,7 +91,7 @@ class CoursesItemsController {
     try {
       const courseItemId = req.params.id;
 
-      const courseItem = await courseItemModel.findById(courseItemId);
+      const courseItem = await courseItemModel.findById(courseItemId).populate("category","_id title");
       if (!courseItem) {
         return sendResponse(res, 404, {
           error: true,
@@ -113,7 +113,7 @@ class CoursesItemsController {
 
   async update(req, res) {
     try {
-      const { error, value } = validateSchema.validate(req.body);
+      const { error, value } = validateSchemaUpdate.validate(req.body);
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
