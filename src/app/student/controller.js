@@ -41,7 +41,9 @@ class StudentController {
 
   async findAll(req, res) {
     try {
-      const service = await studentServices.findAll(req.query);
+      const service = await studentServices.findAll(req.query, req.params);
+      console.log(service);
+
       if (!service) {
         return sendResponse(res, 403, {
           error: true,
@@ -113,10 +115,11 @@ class StudentController {
   async update(req, res) {
     try {
       let { error, value } = validateUpdate.validate(req.body);
-
+      console.log(value);
       if (error) {
         return sendResponse(res, 401, { error: true, message: error.message });
       }
+      
 
       const service = await studentServices.update({
         id: req.params.id,
@@ -155,7 +158,7 @@ class StudentController {
           message: "Failed to delete application!",
         });
       }
-console.log(req.messageSend);
+      console.log(req.messageSend);
 
       return sendResponse(res, 200, {
         error: false,

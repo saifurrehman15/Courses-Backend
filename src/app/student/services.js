@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { dbQueries } from "../../utils/db/queries.js";
 import { instituteModal } from "../institute/schema.js";
 import { userModel } from "../user/user-schema.js";
@@ -15,7 +16,6 @@ class StudentService {
     if (!institute) {
       return { error: "The institute in which you are applying is not found!" };
     }
-
 
     if (user?.owner?.toString() === value.institute) {
       return {
@@ -41,7 +41,7 @@ class StudentService {
     }
   }
 
-  async findAll(queries) {
+  async findAll(queries, params) {
     const { search, limits = 5, page = 1 } = queries;
     let limitsInNumber = Number(limits);
     let skipsOffset = (page - 1) * limitsInNumber;
@@ -53,12 +53,14 @@ class StudentService {
       query = {
         $or: [
           {
-            instituteName: { $regex: queries.search, $options: "i" },
+            "appliedBy.userName": { $regex: queries.search, $options: "i" },
           },
           { instituteAddress: { $regex: queries.search, $options: "i" } },
         ],
       };
     }
+
+    query.institute = new mongoose.Types.ObjectId(params.id);
 
     return await studentModal.aggregate(
       dbQueries.paginationQuery(
@@ -66,7 +68,10 @@ class StudentService {
         "applications",
         skipsOffset,
         limitsInNumber,
-        page
+        page,
+        "users",
+        true,
+        "appliedBy"
       )
     );
   }

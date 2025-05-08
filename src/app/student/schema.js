@@ -11,7 +11,7 @@ const StudentSchema = new Schema(
     studentCnic: { type: String, required: true },
     institute: {
       type: mongoose.Types.ObjectId,
-      ref: "institute",
+      ref: "institutes",
       required: true,
     },
     status: {
