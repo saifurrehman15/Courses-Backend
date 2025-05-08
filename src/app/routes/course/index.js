@@ -38,8 +38,8 @@ router.delete("/delete-category/:id",[authenticateUser,hasAccess], courseListCon
 router.post("/courses/items", [authenticateUser,hasAccess], coursesItemsController.create);
 router.get("/courses/items/:id", coursesItemsController.index);
 router.get("/courses/single-items/:id", coursesItemsController.show);
-router.put("/courses/:id/items/:id", [ authenticateUser, hasAccess ], coursesItemsController.update);
-router.delete("/courses/:id/items/:id", [ authenticateUser, hasAccess ], coursesItemsController.delete);
+router.put("/courses/update-items/:id", [ authenticateUser, hasAccess ], coursesItemsController.update);
+router.delete("/courses/delete-items/:id", [ authenticateUser, hasAccess ], coursesItemsController.delete);
 
 
 export default router;

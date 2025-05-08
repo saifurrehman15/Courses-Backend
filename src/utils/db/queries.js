@@ -9,8 +9,8 @@ class Queries {
     populate = false,
     keyPopulated = ""
   ) {
-    console.log(populate,ref,keyPopulated);
-    
+    console.log(populate, ref, keyPopulated);
+
     let populated = populate
       ? [
           {
@@ -26,17 +26,14 @@ class Queries {
       : [];
 
     return [
+      ...populated,
       {
         $match: query,
       },
       {
         $facet: {
           metadata: [{ $count: "total" }],
-          [data]: [
-            { $skip: skipsOffset },
-            { $limit: limitsInNumber },
-            ...populated,
-          ],
+          [data]: [{ $skip: skipsOffset }, { $limit: limitsInNumber }],
         },
       },
       {
@@ -63,7 +60,6 @@ class Queries {
           },
         },
       },
-      
     ];
   }
 }

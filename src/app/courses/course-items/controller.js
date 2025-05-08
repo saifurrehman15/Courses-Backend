@@ -41,7 +41,7 @@ class Category {
   async findAll(req, res) {
     try {
       const categories = await categoryServices.findAll(req.query, req.params);
-      console.log("hy", categories);
+      console.log("hy", categories[0]);
 
       if (!categories || categories.length == 0) {
         return sendResponse(res, 404, {

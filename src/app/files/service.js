@@ -18,9 +18,9 @@ class FileService {
       };
 
       const uploadStream =
-        type === "video"
-          ? cloudinary.uploader.upload_large_stream(options, callback)
-          : cloudinary.uploader.upload_stream(options, callback);
+        // type === "video"
+        //   ? cloudinary.uploader.upload_large_stream(options, callback)
+           cloudinary.uploader.upload_stream(options, callback);
 
       function callback(error, result) {
         if (error) return reject(error);

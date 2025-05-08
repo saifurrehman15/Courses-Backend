@@ -7,17 +7,17 @@ import trackDuration from "../../middlewares/duration-track.js";
 const router = express.Router();
 
 router.post("/student-application", [authenticateUser,trackDuration], studentController.create);
-router.get("/all-application", authenticateUser, studentController.findAll);
+router.get("/all-application/:id", authenticateUser, studentController.findAll);
 router.get(
   "/single-application/:id",
   authenticateUser,
   studentController.findOne
 );
-router.get(
-  "/student-applications/:id",
-  authenticateUser,
-  studentController.findOwnApplication
-);
+// router.get(
+//   "/student-applications/:id",
+//   authenticateUser,
+//   studentController.findOwnApplication
+// );
 router.put(
   "/update-application/:id",
   [authenticateUser,hasAccess],

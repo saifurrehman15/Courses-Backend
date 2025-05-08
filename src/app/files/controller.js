@@ -4,7 +4,7 @@ import { fileService } from "./service.js";
 class Files {
   async uploadFile(req, res) {
     try {
-      console.log("file from frontend!",req.file);
+      console.log("file from frontend!", req.file);
       const { file } = req;
       const fileName = file.originalname.split(".")[0];
       const mimetype = file.mimetype;
@@ -15,10 +15,11 @@ class Files {
       } else if (mimetype.startsWith("video/")) {
         type = "video";
       } else {
-        type = "raw"; 
+        type = "raw";
       }
 
       const uploading = await fileService.upload(req.file, fileName, type);
+      console.log(uploading);
 
       if (!uploading) {
         return sendResponse(res, 403, {
