@@ -2,16 +2,15 @@ import sendResponse from "../helper/response-sender.js";
 import { instituteModal } from "../institute/schema.js";
 import { userModel } from "../user/user-schema.js";
 import dayjs from "dayjs";
-
 const trackDuration = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
+    const route = req.route.path;
 
     if (!user.institute.duration) {
       return next();
     }
-    console.log(user.institute);
 
     const { duration } = user.institute;
 
@@ -48,15 +47,19 @@ const trackDuration = async (req, res, next) => {
           $unset: { institute: "" },
         }),
       ]);
-      return sendResponse(res, 200, {
-        error: true,
-        message: `You have successfully completed this course!`,
-      });
+      if (route.includes("application")) {
+        return sendResponse(res, 200, {
+          error: true,
+          message: `You have successfully completed this course!`,
+        });
+      }
     } else {
-      return sendResponse(res, 403, {
-        error: true,
-        message: `You can apply after ${daysLeft} days!`,
-      });
+      if (route.includes("application")) {
+        return sendResponse(res, 403, {
+          error: true,
+          message: `You can apply after ${daysLeft} days!`,
+        });
+      }
     }
 
     next();

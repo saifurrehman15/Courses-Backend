@@ -7,9 +7,12 @@ class Queries {
     page,
     ref = "",
     populate = false,
-    keyPopulated = ""
+    keyPopulated = "",
+    populatePeriod = "before",
+    sort = { createdAt: 1 },
+    ...queries
   ) {
-    console.log(populate, ref, keyPopulated);
+    console.log(populate, ref, keyPopulated, sort);
 
     let populated = populate
       ? [
@@ -26,10 +29,12 @@ class Queries {
       : [];
 
     return [
-      ...populated,
+      ...(populatePeriod === "before" ? populated : []),
       {
         $match: query,
       },
+      ...(populatePeriod === "after" ? populated : []),
+      { $sort: sort },
       {
         $facet: {
           metadata: [{ $count: "total" }],
@@ -60,6 +65,7 @@ class Queries {
           },
         },
       },
+      ...queries,
     ];
   }
 }

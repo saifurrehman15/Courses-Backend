@@ -8,11 +8,12 @@ import {
 } from "../../utils/configs/cloudinary-config/index.js";
 
 class CourseService {
-  async find({ page, limit, search, featured, category }) {
-    await connectRedis();
+  async find({ page, limit, search, featured, category, id, sort, level }) {
+    // await connectRedis();
 
     const skip = (page - 1) * limit;
     let query = {};
+    console.log("sort", sort);
 
     if (search) {
       query.$or = [
@@ -20,15 +21,20 @@ class CourseService {
         { description: { $regex: search, $options: "i" } },
       ];
     }
-
     if (featured) {
       query.featured = JSON.parse(featured);
     }
-
     if (category) {
       query.category = category;
     }
-console.log("query",query);
+    if (id) {
+      query.createdBy = new mongoose.Types.ObjectId(id);
+    }
+    if (level) {
+      query.level = level;
+    }
+
+    console.log("query", query);
 
     // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
 
@@ -48,7 +54,8 @@ console.log("query",query);
         page,
         "institutes",
         true,
-        "createdBy"
+        "createdBy",
+        "after"
       )
     );
 
@@ -96,7 +103,7 @@ console.log("query",query);
   }
 
   async findOne(query) {
-    return await courseModel.findOne(query);
+    return await courseModel.findOne(query).populate("createdBy");
   }
 
   async create({ createdBy, body }) {
@@ -110,7 +117,6 @@ console.log("query",query);
   async delete({ id }) {
     const res = await courseModel.findByIdAndDelete(id);
     if (!res) return null;
-
 
     cloud_config();
 

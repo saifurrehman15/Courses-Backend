@@ -21,9 +21,10 @@ const validateUpdate = Joi.object({
   phone: Joi.string().forbidden(),
   institute: Joi.string().forbidden(),
   status: Joi.string()
+    .allow("")
     .valid("pending", "approved", "rejected", "expired", "completed")
     .default("pending"),
-  duration: Joi.string().optional(),
+  duration: Joi.string().allow("").optional().default("3 months"),
 });
 
 export { validateSchema, validateUpdate };
