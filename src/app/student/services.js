@@ -92,14 +92,8 @@ class StudentService {
     } else if (findApplication.status === "expired") {
       return { error: "This application is expired!", status: 403 };
     }
-    const updated = await studentModal.findByIdAndUpdate(id, value, {
-      new: true,
-    });
 
     if (value.status) {
-      let ins = await instituteModal.findById(updated.institute);
-      ins = ins?.toObject();
-
       await studentModal.updateMany(
         {
           appliedBy: user._id,
@@ -107,6 +101,9 @@ class StudentService {
         },
         { $set: { status: "expired" } }
       );
+      const updated = await studentModal.findByIdAndUpdate(id, value, {
+        new: true,
+      });
 
       const data = await userModel.findByIdAndUpdate(
         user._id,
