@@ -49,15 +49,23 @@ class StudentService {
     let query = {};
     console.log("search", queries.search);
 
+    let $status = { $or: [{ status: "pending" }, { status: "approved" }] };
     if (search) {
       query = {
-        $or: [
+        $and: [
           {
-            "appliedBy.userName": { $regex: queries.search, $options: "i" },
+            $or: [
+              {
+                "appliedBy.userName": { $regex: queries.search, $options: "i" },
+              },
+              { instituteAddress: { $regex: queries.search, $options: "i" } },
+            ],
           },
-          { instituteAddress: { $regex: queries.search, $options: "i" } },
+          $status,
         ],
       };
+    } else {
+      query = $status;
     }
 
     query.institute = new mongoose.Types.ObjectId(params.id);
@@ -84,7 +92,7 @@ class StudentService {
     return await studentModal.find({ appliedBy: id });
   }
 
-  async update({ id, value, user }) {
+  async update({ id, value }) {
     const findApplication = await studentModal.findById(id);
 
     if (!findApplication) {
@@ -93,20 +101,26 @@ class StudentService {
       return { error: "This application is expired!", status: 403 };
     }
 
-    if (value.status) {
+    const updated = await studentModal.findByIdAndUpdate(
+      id,
+      { status: value.status },
+      {
+        new: true,
+      }
+    );
+
+    if (updated.status === "approved") {
       await studentModal.updateMany(
         {
-          appliedBy: user._id,
+          appliedBy: updated.appliedBy,
           status: "pending",
         },
         { $set: { status: "expired" } }
       );
-      const updated = await studentModal.findByIdAndUpdate(id, value, {
-        new: true,
-      });
-
-      const data = await userModel.findByIdAndUpdate(
-        user._id,
+    }
+    if (updated.status === "approved") {
+      let data = await userModel.findByIdAndUpdate(
+        updated.appliedBy,
         {
           $set: {
             institute: {
@@ -118,7 +132,7 @@ class StudentService {
         { new: true }
       );
 
-      console.log(data);
+      console.log("lorem ipsum", data);
     }
 
     return updated;

@@ -115,16 +115,15 @@ class StudentController {
   async update(req, res) {
     try {
       let { error, value } = validateUpdate.validate(req.body);
-      console.log(value);
+      console.log(value, error);
+
       if (error) {
         return sendResponse(res, 401, { error: true, message: error.message });
       }
-      
 
       const service = await studentServices.update({
         id: req.params.id,
         value,
-        user: req.user,
       });
       console.log(service);
 

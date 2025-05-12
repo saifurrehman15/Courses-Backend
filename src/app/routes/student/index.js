@@ -6,7 +6,11 @@ import trackDuration from "../../middlewares/duration-track.js";
 
 const router = express.Router();
 
-router.post("/student-application", [authenticateUser,trackDuration], studentController.create);
+router.post(
+  "/student-application",
+  [authenticateUser, trackDuration],
+  studentController.create
+);
 router.get("/all-application/:id", authenticateUser, studentController.findAll);
 router.get(
   "/single-application/:id",
@@ -20,12 +24,12 @@ router.get(
 // );
 router.put(
   "/update-application/:id",
-  [authenticateUser,hasAccess],
+  [authenticateUser, hasAccess],
   studentController.update
 );
 router.delete(
   "/delete-application/:id",
-  [authenticateUser,hasAccess],
+  [authenticateUser, hasAccess],
   studentController.delete
 );
 

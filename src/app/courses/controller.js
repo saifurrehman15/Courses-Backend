@@ -9,16 +9,22 @@ class CoursesController {
       search = "",
       featured = false,
       category = "",
+      id = "",
+      sort = -1,
+      level = "",
     } = req.query;
     try {
-      console.log(category);
-      
+      console.log(category,level);
+
       const courses = await courseService.find({
         page,
         limit: Number(limit),
         search,
         featured,
         category,
+        id,
+        sort: Number(sort),
+        level,
       });
 
       console.log(courses);
@@ -47,7 +53,7 @@ class CoursesController {
     try {
       let user = req.user;
       let idsCheck = user?.institute?.instituteId || user?.owner;
-      console.log(user?.institute?.instituteId, user,category);
+      console.log(req.params.id, idsCheck);
 
       if (req.params.id !== idsCheck.toString()) {
         return sendResponse(res, 403, {

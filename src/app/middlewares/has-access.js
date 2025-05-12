@@ -59,7 +59,7 @@ const hasAccess = async (req, res, next) => {
           category?.institute.toString() ===
             user?.institute?.instituteId.toString()
         : req.body.institute === isInstituteOwner.toString();
-console.log("accessed",hasAccess,req.body.institute);
+      console.log("accessed", hasAccess, req.body.institute);
 
       if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
         return next();
@@ -82,7 +82,8 @@ console.log("accessed",hasAccess,req.body.institute);
       }
 
       const hasAccess = isReadOperation
-        ? course?.createdBy.toString() === isInstituteOwner.toString()
+        ? course.toObject()?.createdBy._id.toString() ===
+          isInstituteOwner.toString()
         : true;
 
       if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
