@@ -6,6 +6,7 @@ const trackDuration = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const user = await userModel.findById(userId);
+    console.log(user);
     const route = req.route.path;
 
     if (!user.institute.duration) {
@@ -13,6 +14,7 @@ const trackDuration = async (req, res, next) => {
     }
 
     const { duration } = user.institute;
+
 
     const [durationNumber, inMYD] = duration.split(" ");
 

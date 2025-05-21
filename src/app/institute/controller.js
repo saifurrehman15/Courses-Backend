@@ -80,7 +80,7 @@ class InstituteController {
       return sendResponse(res, 200, {
         error: false,
         message: "Institute fetched successfully!",
-        data: { ...institute },
+        data: { institute },
       });
     } catch (err) {
       return sendResponse(res, 200, {

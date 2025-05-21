@@ -10,7 +10,7 @@ const UserSchema = new Schema(
     role: { type: String, default: "user" },
     owner: { type: mongoose.Types.ObjectId, ref: "institutes" },
     institute: {
-      duration: { type: String, default: "3 months" },
+      duration: String,
       instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
     },
   },
