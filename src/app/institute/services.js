@@ -1,6 +1,11 @@
+import mongoose from "mongoose";
 import { dbQueries } from "../../utils/db/queries.js";
 import { userModel } from "../user/user-schema.js";
 import { instituteModal } from "./schema.js";
+import { courseService } from "../courses/services.js";
+import { studentServices } from "../student/services.js";
+import { studentModal } from "../student/schema.js";
+import { client, connectRedis } from "../../utils/configs/redis/index.js";
 
 class InstituteServices {
   async create({ body, user }) {
@@ -29,26 +34,32 @@ class InstituteServices {
   }
 
   async findAll(queries) {
+    await connectRedis();
+
     const { search, limits = 5, page = 1 } = queries;
-    let limitsInNumber = Number(limits);
-    let skipsOffset = (page - 1) * limitsInNumber;
+    const limitsInNumber = Number(limits);
+    const skipsOffset = (page - 1) * limitsInNumber;
 
     let query = {};
-    console.log("search", queries.search);
-
     if (search) {
       query = {
         $or: [
-          {
-            instituteName: { $regex: queries.search, $options: "i" },
-          },
+          { instituteName: { $regex: queries.search, $options: "i" } },
           { instituteAddress: { $regex: queries.search, $options: "i" } },
         ],
       };
     }
-    console.log(query);
 
-    return await instituteModal.aggregate(
+    const cache = `institutes:page=${page}&&limit=${limitsInNumber}&&skip=${skipsOffset}&&search=${search || ""}`;
+    const data = await client.get(cache);
+
+    if (data) {
+      console.log("institutes from redis", data);
+
+      return JSON.parse(data);
+    }
+
+    const result = await instituteModal.aggregate(
       dbQueries.paginationQuery(
         query,
         "institutes",
@@ -57,6 +68,42 @@ class InstituteServices {
         page
       )
     );
+
+    if (Array.isArray(result[0]?.institutes)) {
+      const updatedInstitutes = await Promise.all(
+        result[0].institutes.map(async (ins) => {
+          try {
+            const [courses, students] = await Promise.all([
+              courseService.findOwn({
+                hasQuery: true,
+                queries: { createdBy: ins._id },
+              }),
+              studentModal.find({
+                institute: ins._id,
+              }),
+            ]);
+
+            return {
+              ...ins,
+              courses: courses.length || 0,
+              students: students.length || 0,
+            };
+          } catch (err) {
+            console.error("Error for institute:", ins._id, err);
+            return {
+              ...ins,
+              courses: 0,
+              students: 0,
+              error: true,
+            };
+          }
+        })
+      );
+
+      result[0].institutes = updatedInstitutes;
+    }
+    await client.set(cache, JSON.stringify(result), "EX", 60 * 60 * 24);
+    return result;
   }
 
   async findOne(query) {
@@ -64,7 +111,9 @@ class InstituteServices {
   }
 
   async updateDoc({ id, value }) {
-    return await instituteModal.findByIdAndUpdate(id, { ...value }, { new: true }).lean();
+    return await instituteModal
+      .findByIdAndUpdate(id, { ...value }, { new: true })
+      .lean();
   }
 
   async deleteDoc(id) {

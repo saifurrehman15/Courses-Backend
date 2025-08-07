@@ -36,21 +36,21 @@ class CategoriesController {
 
   async getAll(req, res) {
     try {
-      await connectRedis();
+      // await connectRedis();
 
-      const data = await client.get("categories");
-      if (data) {
-        console.log("categories get from redis", data);
-        return res
-          .status(200)
-          .json({ error: false, data: { category: JSON.parse(data) } });
-      }
+      // const data = await client.get("categories");
+      // if (data) {
+      //   console.log("categories get from redis", data);
+      //   return res
+      //     .status(200)
+      //     .json({ error: false, data: { category: JSON.parse(data) } });
+      // }
       
       const categories = await categoryModel.find().sort({ createdAt: -1 });
       
-      await client.set("categories", JSON.stringify(categories), {
-        EX: 60 * 60 * 24, 
-      });
+      // await client.set("categories", JSON.stringify(categories), {
+      //   EX: 60 * 60 * 24, 
+      // });
       
       console.log("categories set to redis");
       
