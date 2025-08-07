@@ -12,9 +12,10 @@ class CoursesController {
       id = "",
       sort = -1,
       level = "",
+      courseType = "",
     } = req.query;
     try {
-      console.log(category,level);
+      console.log(category, level);
 
       const courses = await courseService.find({
         page,
@@ -25,6 +26,7 @@ class CoursesController {
         id,
         sort: Number(sort),
         level,
+        courseType,
       });
 
       console.log(courses);
@@ -52,8 +54,8 @@ class CoursesController {
     } = req.query;
     try {
       let user = req.user;
-      let idsCheck = user?.institute?.instituteId || user?.owner;
-      console.log(req.params.id, idsCheck);
+      let idsCheck = user?.owner;
+      console.log(req.params.id, idsCheck, user);
 
       if (req.params.id !== idsCheck.toString()) {
         return sendResponse(res, 403, {
@@ -70,6 +72,8 @@ class CoursesController {
         featured,
         category,
       });
+
+      console.log(courses);
 
       return sendResponse(res, 200, {
         error: false,

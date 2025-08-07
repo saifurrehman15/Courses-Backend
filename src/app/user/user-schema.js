@@ -4,13 +4,14 @@ const { Schema } = mongoose;
 
 const UserSchema = new Schema(
   {
-    userName: { type: String, required: true },
+    userName: { type: String },
     email: { type: String, required: true },
-    password: { type: String, required: true },
+    bio: { type: String },
+    password: { type: String },
     role: { type: String, default: "user" },
     owner: { type: mongoose.Types.ObjectId, ref: "institutes" },
     institute: {
-      duration: { type: String, default: "3 months" },
+      duration: String,
       instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
     },
   },

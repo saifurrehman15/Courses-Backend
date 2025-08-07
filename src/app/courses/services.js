@@ -8,7 +8,17 @@ import {
 } from "../../utils/configs/cloudinary-config/index.js";
 
 class CourseService {
-  async find({ page, limit, search, featured, category, id, sort, level }) {
+  async find({
+    page,
+    limit,
+    search,
+    featured,
+    category,
+    id,
+    sort,
+    level,
+    courseType,
+  }) {
     // await connectRedis();
 
     const skip = (page - 1) * limit;
@@ -34,9 +44,14 @@ class CourseService {
       query.level = level;
     }
 
+    if (courseType) {
+      query[`courseType.type`] = courseType;
+    }
+
     console.log("query", query);
 
-    // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
+    // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}
+    // &category=${category || ""}`;
 
     //   const cachedData = await client.get(cacheKey);
 
@@ -66,40 +81,57 @@ class CourseService {
     return result;
   }
 
-  async findOwn({ page, limit, search, params, featured, category }) {
-    const skip = (page - 1) * limit;
-    console.log(params);
+  async findOwn({
+    page,
+    limit,
+    search,
+    params,
+    featured,
+    category,
+    hasQuery = false,
+    queries = {},
+  }) {
+    if (!hasQuery) {
+      const skip = (page - 1) * limit;
+      console.log(params);
 
-    let query = {};
+      let query = {};
 
-    if (search) {
-      query = {
-        $or: [
-          { title: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
-        ],
-      };
+      if (search) {
+        query = {
+          $or: [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ],
+        };
+      }
+
+      query.createdBy = new mongoose.Types.ObjectId(params.id);
+
+      // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
+      // const dataGet = await client.get(cacheKey);
+      // console.log("dataa=>>>", dataGet);
+
+      // if (dataGet) {
+      //   console.log("Data from redis===>", dataGet);
+
+      //   return JSON.parse(dataGet);
+      // }
+
+      const getCourse = await courseModel.aggregate(
+        dbQueries.paginationQuery(query, "courses", skip, limit, page)
+      );
+
+      // await client.set(cacheKey, JSON.stringify(getCourse), "EX", 60 * 60 * 24);
+      console.log(getCourse);
+
+      return getCourse;
+    } else {
+      console.log(queries);
+      
+      const getCourse = await courseModel.find(queries);
+      return getCourse;
     }
-
-    query.createdBy = new mongoose.Types.ObjectId(params.id);
-
-    // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
-    // const dataGet = await client.get(cacheKey);
-    // console.log("dataa=>>>", dataGet);
-
-    // if (dataGet) {
-    //   console.log("Data from redis===>", dataGet);
-
-    //   return JSON.parse(dataGet);
-    // }
-
-    const getCourse = await courseModel.aggregate(
-      dbQueries.paginationQuery(query, "courses", skip, limit, page)
-    );
-
-    // await client.set(cacheKey, JSON.stringify(getCourse), "EX", 60 * 60 * 24);
-
-    return getCourse;
   }
 
   async findOne(query) {

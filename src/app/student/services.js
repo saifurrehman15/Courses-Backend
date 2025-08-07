@@ -41,47 +41,54 @@ class StudentService {
     }
   }
 
-  async findAll(queries, params) {
-    const { search, limits = 5, page = 1 } = queries;
-    let limitsInNumber = Number(limits);
-    let skipsOffset = (page - 1) * limitsInNumber;
+  async findAll(queries, params, queries2 = {}, hasQuery = false) {
+    if (!hasQuery) {
+      const { search, limits = 5, page = 1 } = queries;
+      let limitsInNumber = Number(limits);
+      let skipsOffset = (page - 1) * limitsInNumber;
 
-    let query = {};
-    console.log("search", queries.search);
+      let query = {};
+      console.log("search", queries.search);
 
-    let $status = { $or: [{ status: "pending" }, { status: "approved" }] };
-    if (search) {
-      query = {
-        $and: [
-          {
-            $or: [
-              {
-                "appliedBy.userName": { $regex: queries.search, $options: "i" },
-              },
-              { instituteAddress: { $regex: queries.search, $options: "i" } },
-            ],
-          },
-          $status,
-        ],
-      };
+      let $status = { $or: [{ status: "pending" }, { status: "approved" }] };
+      if (search) {
+        query = {
+          $and: [
+            {
+              $or: [
+                {
+                  "appliedBy.userName": {
+                    $regex: queries.search,
+                    $options: "i",
+                  },
+                },
+                { instituteAddress: { $regex: queries.search, $options: "i" } },
+              ],
+            },
+            $status,
+          ],
+        };
+      } else {
+        query = $status;
+      }
+
+      query.institute = new mongoose.Types.ObjectId(params.id);
+
+      return await studentModal.aggregate(
+        dbQueries.paginationQuery(
+          query,
+          "applications",
+          skipsOffset,
+          limitsInNumber,
+          page,
+          "users",
+          true,
+          "appliedBy"
+        )
+      );
     } else {
-      query = $status;
+      return await studentModal.find(queries2);
     }
-
-    query.institute = new mongoose.Types.ObjectId(params.id);
-
-    return await studentModal.aggregate(
-      dbQueries.paginationQuery(
-        query,
-        "applications",
-        skipsOffset,
-        limitsInNumber,
-        page,
-        "users",
-        true,
-        "appliedBy"
-      )
-    );
   }
 
   async findOne(queries) {
