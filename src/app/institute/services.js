@@ -54,8 +54,6 @@ class InstituteServices {
     const data = await client.get(cache);
 
     if (data) {
-      console.log("institutes from redis", data);
-
       return JSON.parse(data);
     }
 

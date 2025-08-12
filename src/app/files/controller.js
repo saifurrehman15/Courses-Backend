@@ -1,9 +1,11 @@
 import sendResponse from "../helper/response-sender.js";
+import { userServices } from "../user/user-service.js";
 import { fileService } from "./service.js";
 
 class Files {
   async uploadFile(req, res) {
     try {
+      const { user } = req;
       console.log("file from frontend!", req.file);
       const { file } = req;
       const fileName = file.originalname.split(".")[0];
@@ -19,12 +21,23 @@ class Files {
       }
 
       const uploading = await fileService.upload(req.file, fileName, type);
-      console.log(uploading);
 
       if (!uploading) {
         return sendResponse(res, 403, {
           error: true,
           message: "Failed to upload file!",
+        });
+      }
+
+      const uploadingProfile = await userServices.updateService(user._id, {
+        profile: uploading.secure_url,
+      });
+      console.log(uploadingProfile);
+
+      if (!uploadingProfile) {
+        return sendResponse(res, 403, {
+          error: true,
+          message: "Failed to update user profile avatar!",
         });
       }
 

@@ -19,11 +19,11 @@ class CourseService {
     level,
     courseType,
   }) {
-    // await connectRedis();
+    await connectRedis();
 
     const skip = (page - 1) * limit;
     let query = {};
-    console.log("sort", sort);
+    console.log("sort", sort, courseType, category);
 
     if (search) {
       query.$or = [
@@ -50,15 +50,15 @@ class CourseService {
 
     console.log("query", query);
 
-    // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}
-    // &category=${category || ""}`;
+    const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}
+    &category=${category || ""}`;
 
-    //   const cachedData = await client.get(cacheKey);
+    const cachedData = await client.get(cacheKey);
 
-    //   if (cachedData) {
-    //     console.log("Data served from Redis cache");
-    //     return JSON.parse(cachedData);
-    //   }
+    if (cachedData) {
+      console.log("Data served from Redis cache");
+      return JSON.parse(cachedData);
+    }
 
     const result = await courseModel.aggregate(
       dbQueries.paginationQuery(
@@ -74,9 +74,7 @@ class CourseService {
       )
     );
 
-    console.log(result);
-
-    // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
+    await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
 
     return result;
   }
@@ -93,7 +91,7 @@ class CourseService {
   }) {
     if (!hasQuery) {
       const skip = (page - 1) * limit;
-      console.log(params);
+      console.log(params,page,limit);
 
       let query = {};
 
@@ -117,6 +115,7 @@ class CourseService {
 
       //   return JSON.parse(dataGet);
       // }
+console.log("query",query);
 
       const getCourse = await courseModel.aggregate(
         dbQueries.paginationQuery(query, "courses", skip, limit, page)
@@ -128,7 +127,7 @@ class CourseService {
       return getCourse;
     } else {
       console.log(queries);
-      
+
       const getCourse = await courseModel.find(queries);
       return getCourse;
     }

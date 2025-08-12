@@ -6,6 +6,6 @@ import trackDuration from "../../middlewares/duration-track.js";
 const router = express.Router();
 
 router.get("/single-user", [authenticateUser], UserController.findSingleUser);
-router.post("/update-user", [authenticateUser], UserController.updateUser);
+router.put("/update-user", [authenticateUser], UserController.updateUser);
 
 export default router;

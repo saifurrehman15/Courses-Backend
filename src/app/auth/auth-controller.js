@@ -43,6 +43,7 @@ const signUp = async (req, res) => {
 // login controller
 const login = async (req, res) => {
   const { error, value } = loginSchema.validate(req.body);
+console.log(error,req.body);
 
   if (error) {
     sendResponse(res, 400, { error: true, message: error.message });

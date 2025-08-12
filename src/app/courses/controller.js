@@ -55,7 +55,7 @@ class CoursesController {
     try {
       let user = req.user;
       let idsCheck = user?.owner;
-      console.log(req.params.id, idsCheck, user);
+      console.log(page);
 
       if (req.params.id !== idsCheck.toString()) {
         return sendResponse(res, 403, {
