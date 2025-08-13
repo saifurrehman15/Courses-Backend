@@ -54,6 +54,7 @@ class InstituteServices {
     const data = await client.get(cache);
 
     if (data) {
+
       return JSON.parse(data);
     }
 

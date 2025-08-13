@@ -55,6 +55,7 @@ class CoursesController {
     try {
       let user = req.user;
       let idsCheck = user?.owner;
+
       console.log(page);
 
       if (req.params.id !== idsCheck.toString()) {

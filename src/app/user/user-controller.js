@@ -24,6 +24,7 @@ class User {
     try {
       const { user, body } = req;
       let updateUser = {};
+
 console.log(body);
 
       let validateUser = Joi.object({
