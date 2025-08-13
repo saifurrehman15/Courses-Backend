@@ -17,12 +17,12 @@ const UserSchema = new Schema(
     },
     institute_sub_details: {
       plan: { type: String, default: "Free", enum: ["Free", "Basic", "Pro"] },
-      freeCourseUsed: { type: Boolean, default: false },
       paymentStatus: {
         type: String,
         default: "Unpaid",
         enum: ["Unpaid", "Active", "Expired"],
       },
+      planLimit: { type: Number, default: 3 },
       stripeCustomerId: String,
       stripeSessionId: String,
       planExpiresAt: Date,

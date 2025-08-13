@@ -7,7 +7,7 @@ class CoursesController {
       limit = 10,
       page = 1,
       search = "",
-      featured = false,
+      // featured = false,
       category = "",
       id = "",
       sort = -1,
@@ -21,7 +21,7 @@ class CoursesController {
         page,
         limit: Number(limit),
         search,
-        featured,
+        // featured,
         category,
         id,
         sort: Number(sort),
@@ -49,7 +49,7 @@ class CoursesController {
       limit = 10,
       page = 1,
       search = "",
-      featured = "",
+      // featured = "",
       category = "",
     } = req.query;
     try {
@@ -69,7 +69,7 @@ class CoursesController {
         limit: Number(limit),
         search: search,
         params: req.params,
-        featured,
+        // featured,
         category,
       });
 
@@ -110,6 +110,8 @@ class CoursesController {
   async create(req, res) {
     try {
       const { error, value } = validateSchema.validate(req.body);
+      console.log(error);
+
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
@@ -117,6 +119,7 @@ class CoursesController {
       const course = await courseService.create({
         createdBy: req.user.owner,
         body: value,
+        user: req.user,
       });
 
       if (!course) {

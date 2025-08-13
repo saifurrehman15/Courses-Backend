@@ -14,7 +14,10 @@ const CourseSchema = new Schema(
       required: true,
       ref: "institutes",
     },
-    featured: { type: Boolean, required: true },
+    courseType: {
+      type: { type: String, required: true, default: "free" },
+      price: { type: Number, default: 0 },
+    },
   },
   {
     timestamps: true,
