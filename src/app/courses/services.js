@@ -6,24 +6,27 @@ import {
   cloudinary,
   cloud_config,
 } from "../../utils/configs/cloudinary-config/index.js";
+import { userModel } from "../user/user-schema.js";
 
 class CourseService {
   async find({
     page,
     limit,
     search,
-    featured,
+    // featured,
     category,
     id,
     sort,
     level,
     courseType,
   }) {
-    // await connectRedis();
+
+    await connectRedis();
+
+
 
     const skip = (page - 1) * limit;
     let query = {};
-    console.log("sort", sort);
 
     if (search) {
       query.$or = [
@@ -31,9 +34,7 @@ class CourseService {
         { description: { $regex: search, $options: "i" } },
       ];
     }
-    if (featured) {
-      query.featured = JSON.parse(featured);
-    }
+
     if (category) {
       query.category = category;
     }
@@ -50,15 +51,17 @@ class CourseService {
 
     console.log("query", query);
 
-    // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}
-    // &category=${category || ""}`;
 
-    //   const cachedData = await client.get(cacheKey);
+    const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}
+    &category=${category || ""}`;
 
-    //   if (cachedData) {
-    //     console.log("Data served from Redis cache");
-    //     return JSON.parse(cachedData);
-    //   }
+
+    const cachedData = await client.get(cacheKey);
+
+    if (cachedData) {
+      console.log("Data served from Redis cache");
+      return JSON.parse(cachedData);
+    }
 
     const result = await courseModel.aggregate(
       dbQueries.paginationQuery(
@@ -70,13 +73,12 @@ class CourseService {
         "institutes",
         true,
         "createdBy",
-        "after"
+        "after",
+        { createdAt: sort }
       )
     );
 
-    console.log(result);
-
-    // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
+    await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
 
     return result;
   }
@@ -93,7 +95,9 @@ class CourseService {
   }) {
     if (!hasQuery) {
       const skip = (page - 1) * limit;
-      console.log(params);
+
+      console.log(params, page, limit);
+
 
       let query = {};
 
@@ -118,6 +122,9 @@ class CourseService {
       //   return JSON.parse(dataGet);
       // }
 
+      console.log("query", query);
+
+
       const getCourse = await courseModel.aggregate(
         dbQueries.paginationQuery(query, "courses", skip, limit, page)
       );
@@ -128,7 +135,7 @@ class CourseService {
       return getCourse;
     } else {
       console.log(queries);
-      
+
       const getCourse = await courseModel.find(queries);
       return getCourse;
     }
@@ -138,9 +145,21 @@ class CourseService {
     return await courseModel.findOne(query).populate("createdBy");
   }
 
-  async create({ createdBy, body }) {
+  // ** CREATE COURSES ** /
+  async create({ createdBy, body, user }) {
+    await connectRedis();
+    await client.del(`courses:*`);
+    let extractLimit = user?.institute_sub_details?.planLimit || 0;
+
+    if (extractLimit >= 1) {
+      extractLimit -= 1;
+      await userModel.findByIdAndUpdate(user._id, {
+        $set: { "institute_sub_details.planLimit": extractLimit },
+      });
+    }
     return await courseModel.create({ ...body, createdBy });
   }
+  // ** END ** /
 
   async update({ id, body }) {
     return await courseModel.findByIdAndUpdate(id, body, { new: true });

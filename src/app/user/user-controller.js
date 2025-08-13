@@ -25,12 +25,20 @@ class User {
       const { user, body } = req;
       let updateUser = {};
 
+console.log(body);
+
       let validateUser = Joi.object({
         userName: Joi.string().min(3).optional(),
-        bio: Joi.string().min(10).optional(),
+        bio: Joi.string()
+          .optional()
+          .allow("")
+          .when(Joi.string().min(1), {
+            then: Joi.string().min(10),
+          }),
       });
 
       const { error, value } = validateUser.validate(body);
+      console.log(error);
 
       if (error) {
         sendResponse(res, 401, { error: true, message: error.message });

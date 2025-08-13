@@ -1,10 +1,13 @@
 import sendResponse from "../helper/response-sender.js";
+import { userServices } from "../user/user-service.js";
 import { fileService } from "./service.js";
 
 class Files {
   async uploadFile(req, res) {
     try {
-      console.log("file from frontend!", req.file);
+      const { user, query } = req;
+      const { isProfile = false } = query;
+      // console.log("file from frontend!", req.file);
       const { file } = req;
       const fileName = file.originalname.split(".")[0];
       const mimetype = file.mimetype;
@@ -19,13 +22,26 @@ class Files {
       }
 
       const uploading = await fileService.upload(req.file, fileName, type);
-      console.log(uploading);
 
       if (!uploading) {
         return sendResponse(res, 403, {
           error: true,
           message: "Failed to upload file!",
         });
+      }
+
+      if (isProfile) {
+        const uploadingProfile = await userServices.updateService(user._id, {
+          profile: uploading.secure_url,
+        });
+        // console.log(uploadingProfile);
+
+        if (!uploadingProfile) {
+          return sendResponse(res, 403, {
+            error: true,
+            message: "Failed to update user profile avatar!",
+          });
+        }
       }
 
       return sendResponse(res, 200, {
