@@ -1,14 +1,17 @@
+export { client, connectRedis };
+
 import { createClient } from "redis";
 
-const redisConfig = {
-  url: process.env.REDIS_URL,
-};
+const client = createClient({
+  username: "default",
+  password: process.env.REDIS_PASSWORD,
+  socket: {
+    host: process.env.REDIS_URL,
+    port: process.env.REDIS_PORT,
+  },
+});
 
-const client = createClient(redisConfig);
-
-client.on("error", (err) =>
-  console.error(`Redis Client Error: ${err.message}`)
-);
+client.on("error", (err) => console.log("Redis Client Error", err));
 
 async function connectRedis() {
   try {
@@ -21,5 +24,3 @@ async function connectRedis() {
     throw err;
   }
 }
-
-export { client, connectRedis };

@@ -7,28 +7,26 @@ class CoursesController {
       limit = 10,
       page = 1,
       search = "",
-      featured = false,
+      // featured = false,
       category = "",
       id = "",
       sort = -1,
       level = "",
+      courseType = "",
     } = req.query;
     try {
-<<<<<<< Updated upstream
-      console.log(category,level);
-=======
-      console.log("Checking Data",category, courseType);
->>>>>>> Stashed changes
+      console.log(category, level);
 
       const courses = await courseService.find({
         page,
         limit: Number(limit),
         search,
-        featured,
+        // featured,
         category,
         id,
         sort: Number(sort),
         level,
+        courseType,
       });
 
       console.log(courses);
@@ -51,13 +49,14 @@ class CoursesController {
       limit = 10,
       page = 1,
       search = "",
-      featured = "",
+      // featured = "",
       category = "",
     } = req.query;
     try {
       let user = req.user;
-      let idsCheck = user?.institute?.instituteId || user?.owner;
-      console.log(req.params.id, idsCheck);
+      let idsCheck = user?.owner;
+
+      console.log(page);
 
       if (req.params.id !== idsCheck.toString()) {
         return sendResponse(res, 403, {
@@ -72,9 +71,11 @@ class CoursesController {
         limit: Number(limit),
         search: search,
         params: req.params,
-        featured,
+        // featured,
         category,
       });
+
+      console.log(courses);
 
       return sendResponse(res, 200, {
         error: false,
@@ -111,10 +112,8 @@ class CoursesController {
   async create(req, res) {
     try {
       const { error, value } = validateSchema.validate(req.body);
-<<<<<<< Updated upstream
-=======
+      console.log(error);
 
->>>>>>> Stashed changes
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
@@ -122,6 +121,7 @@ class CoursesController {
       const course = await courseService.create({
         createdBy: req.user.owner,
         body: value,
+        user: req.user,
       });
 
       if (!course) {
