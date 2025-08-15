@@ -1,20 +1,28 @@
 import mongoose from "mongoose";
 import { dbQueries } from "../../../utils/db/queries.js";
 import { itemsCategoryModal } from "./schema.js";
+import { syllabusPlansModel } from "../syllabus-plans.js";
 
 class CategoryServices {
-  async create({ value, institute }) {
-    console.log(institute, {
-      ...value,
-      institute: institute.toString(),
-    });
-
+  async create({ value, institute, limitCount }) {
+   
     const findCategory = await itemsCategoryModal.findOne({
       title: value.title,
     });
 
     if (findCategory) {
       return { error: `${value.title} is already exist!`, status: 403 };
+    }
+
+    if (limitCount || limitCount === 0) {
+      await syllabusPlansModel.findOneAndUpdate(
+        { courseId: value.course },
+        {
+          $set: {
+            syllabusLimit: limitCount,
+          },
+        }
+      );
     }
 
     return await itemsCategoryModal.create({

@@ -4,7 +4,8 @@ export const validateSchema = Joi.object({
   title: Joi.string().trim().min(3).required(),
   description: Joi.string().trim().min(3).required(),
   category: Joi.string().required(),
-  institute:Joi.string().required(),
+  course: Joi.string().required(),
+  institute: Joi.string().required(),
   url: Joi.string().uri().required(),
   type: Joi.string().valid("video", "pdf", "word").required(),
 });

@@ -14,6 +14,7 @@ class Category {
       const category = await categoryServices.create({
         value,
         institute: req.user.owner,
+        limitCount: req.limitCount,
       });
 
       if (category.error) {

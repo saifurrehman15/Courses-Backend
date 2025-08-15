@@ -6,6 +6,12 @@ import {
   cloudinary,
   cloud_config,
 } from "../../utils/configs/cloudinary-config/index.js";
+<<<<<<< Updated upstream
+=======
+import { userModel } from "../user/user-schema.js";
+import { syllabusPlansModel } from "./syllabus-plans.js";
+import { chaptersPlansModel } from "./chapters-plans.js";
+>>>>>>> Stashed changes
 
 class CourseService {
   async find({ page, limit, search, featured, category, id, sort, level }) {
@@ -36,7 +42,12 @@ class CourseService {
 
     console.log("query", query);
 
+<<<<<<< Updated upstream
     // const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}&featured=${featured || ""}&category=${category || ""}`;
+=======
+    const cacheKey = `courses:page=${page}&limit=${limit}&search=${search || ""}
+    &category=${category || ""}&courseType=${courseType} || ""`;
+>>>>>>> Stashed changes
 
     //   const cachedData = await client.get(cacheKey);
 
@@ -106,8 +117,36 @@ class CourseService {
     return await courseModel.findOne(query).populate("createdBy");
   }
 
+<<<<<<< Updated upstream
   async create({ createdBy, body }) {
     return await courseModel.create({ ...body, createdBy });
+=======
+  // ** CREATE COURSES ** /
+  async create({ createdBy, body, user }) {
+    await connectRedis();
+    await client.del(`courses:*`);
+
+    let extractLimit = user?.institute_sub_details?.planLimit || 0;
+
+    if (extractLimit >= 1) {
+      extractLimit -= 1;
+      await userModel.findByIdAndUpdate(user._id, {
+        $set: { "institute_sub_details.planLimit": extractLimit },
+      });
+    }
+    const coursesResult = await courseModel.create({ ...body, createdBy });
+    let createObj = {
+      courseId: coursesResult._id,
+      instituteId: user?.owner,
+    };
+    if (coursesResult) {
+      await Promise.all([
+        syllabusPlansModel.create(createObj),
+        chaptersPlansModel.create(createObj),
+      ]);
+    }
+    return coursesResult;
+>>>>>>> Stashed changes
   }
 
   async update({ id, body }) {

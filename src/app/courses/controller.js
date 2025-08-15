@@ -14,7 +14,11 @@ class CoursesController {
       level = "",
     } = req.query;
     try {
+<<<<<<< Updated upstream
       console.log(category,level);
+=======
+      console.log("Checking Data",category, courseType);
+>>>>>>> Stashed changes
 
       const courses = await courseService.find({
         page,
@@ -59,6 +63,7 @@ class CoursesController {
         return sendResponse(res, 403, {
           error: true,
           message: "You don't have permission to access this course!",
+          data: [],
         });
       }
 
@@ -106,6 +111,10 @@ class CoursesController {
   async create(req, res) {
     try {
       const { error, value } = validateSchema.validate(req.body);
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }

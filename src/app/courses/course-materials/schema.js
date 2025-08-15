@@ -11,6 +11,11 @@ const CourseItemSchema = new Schema(
       ref: "course_items",
       required: true,
     },
+    course: {
+      type: mongoose.Types.ObjectId,
+      ref: "courses",
+      required: true,
+    },
     institute: {
       type: mongoose.Types.ObjectId,
       ref: "institutes",

@@ -4,6 +4,8 @@ import { studentServices } from "../student/services.js";
 import { categoryServices } from "../courses/course-items/services.js";
 import { courseItemModel } from "../courses/course-materials/schema.js";
 import { courseService } from "../courses/services.js";
+import { courseModel } from "../courses/schema.js";
+import mongoose from "mongoose";
 
 const hasAccess = async (req, res, next) => {
   const user = req.user;
@@ -12,6 +14,7 @@ const hasAccess = async (req, res, next) => {
   const isInstituteOwner = user?.owner;
   const isAdmin = user?.role === "admin";
   const isReadOperation = method !== "POST";
+console.log(user,isInstituteOwner);
 
   try {
     const institute = await instituteService.findOne({ _id: isInstituteOwner });
@@ -41,11 +44,21 @@ const hasAccess = async (req, res, next) => {
     }
 
     if (route.includes("category")) {
-      const paramId = req.params.id;
+      const paramId = req?.params?.id;
       const query = {
         $or: [{ _id: paramId }, { course: paramId }, { institute: paramId }],
       };
       const category = await categoryServices.findOne(query);
+      let categoryHasCourse = await courseModel.findOne({
+        _id: new mongoose.Types.ObjectId(req.body.course),
+      });
+
+      if (!categoryHasCourse) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "Their is no course available on that id!",
+        });
+      }
 
       if (!category && isReadOperation) {
         return sendResponse(res, 404, {
@@ -53,13 +66,15 @@ const hasAccess = async (req, res, next) => {
           message: "Course category not found!",
         });
       }
+      console.log("instituteOwner",isInstituteOwner);
 
       const hasAccess = isReadOperation
-        ? category?.institute.toString() === isInstituteOwner.toString() ||
+        ? category?.institute?.toString() === isInstituteOwner?.toString() ||
           category?.institute.toString() ===
             user?.institute?.instituteId.toString()
-        : req.body.institute === isInstituteOwner.toString();
-      console.log("accessed", hasAccess, req.body.institute);
+        : isInstituteOwner
+          ? req.body.institute === isInstituteOwner.toString()
+          : false;
 
       if ((institute && institute.approvedByAdmin && hasAccess) || isAdmin) {
         return next();

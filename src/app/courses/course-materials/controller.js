@@ -1,4 +1,5 @@
 import sendResponse from "../../helper/response-sender.js";
+import { chaptersPlansModel } from "../chapters-plans.js";
 import { itemsCategoryModal } from "../course-items/schema.js";
 import { courseItemModel } from "./schema.js";
 import { courseItemsService } from "./services.js";
@@ -8,6 +9,7 @@ import { validateSchema, validateSchemaUpdate } from "./validate.js";
 class CoursesItemsController {
   async create(req, res) {
     try {
+      const { limitCount } = req;
       const instituteId = req.user?.owner;
 
       if (!instituteId) {
@@ -28,6 +30,17 @@ class CoursesItemsController {
           error: true,
           message: "Course not found!",
         });
+      }
+
+      if (limitCount || limitCount === 0) {
+        await chaptersPlansModel.findOneAndUpdate(
+          { courseId: value.course },
+          {
+            $set: {
+              chaptersLimit: limitCount,
+            },
+          }
+        );
       }
 
       const courseItem = await courseItemModel.create({
@@ -91,7 +104,9 @@ class CoursesItemsController {
     try {
       const courseItemId = req.params.id;
 
-      const courseItem = await courseItemModel.findById(courseItemId).populate("category","_id title");
+      const courseItem = await courseItemModel
+        .findById(courseItemId)
+        .populate("category", "_id title");
       if (!courseItem) {
         return sendResponse(res, 404, {
           error: true,
