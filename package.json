@@ -30,6 +30,7 @@
     "passport": "^0.7.0",
     "passport-google-oidc": "^0.1.0",
     "redis": "^4.7.0",
-    "resend": "^4.2.0"
+    "resend": "^4.2.0",
+    "stripe": "^18.4.0"
   }
 }

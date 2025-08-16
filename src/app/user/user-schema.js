@@ -15,38 +15,24 @@ const UserSchema = new Schema(
       duration: String,
       instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
     },
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
+
     institute_sub_details: {
       plan: {
         type: String,
         default: "Free",
         enum: ["Free", "Pro", "Enterprise"],
       },
-=======
-    institute_sub_details: {
-      plan: { type: String, default: "Free", enum: ["Free", "Basic", "Pro"] },
->>>>>>> 97e74d51c5bc44ec865d7fd2a70eece5e4954b0a
       paymentStatus: {
         type: String,
         default: "Unpaid",
         enum: ["Unpaid", "Active", "Expired"],
       },
       planLimit: { type: Number, default: 3 },
-<<<<<<< HEAD
-      subjectLimit: { type: Number, default: 10 },
-      chaptersLimit: { type: Number, default: 5 },
-=======
->>>>>>> 97e74d51c5bc44ec865d7fd2a70eece5e4954b0a
-      stripeCustomerId: String,
+      stripePaymentId: String,
       stripeSessionId: String,
       planExpiresAt: Date,
     },
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> 97e74d51c5bc44ec865d7fd2a70eece5e4954b0a
+
   },
   { timestamps: true }
 );

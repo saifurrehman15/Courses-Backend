@@ -12,6 +12,7 @@ import passport from "./src/utils/passport-utils/passport-util.js";
 import session from "express-session";
 import cron from "node-cron";
 import { client } from "./src/utils/configs/redis/index.js";
+import Stripe from "stripe";
 const app = express();
 const port = process.env.PORT;
 
@@ -53,6 +54,33 @@ cron.schedule("0 2 * * *", async () => {
 
 app.get("/", (req, res) => {
   res.send("Server is running on port " + port);
+});
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency, billingCycle, plan, customerDetails } = req.body;
+
+    // Create a PaymentIntent with the order amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: currency,
+      metadata: {
+        billing_cycle: billingCycle,
+        plan: plan,
+        customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`,
+        customer_email: customerDetails.email
+      }
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret
+    });
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.listen(port, () => console.log("Server running on port " + port));
