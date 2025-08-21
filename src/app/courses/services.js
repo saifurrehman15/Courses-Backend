@@ -7,6 +7,9 @@ import {
   cloud_config,
 } from "../../utils/configs/cloudinary-config/index.js";
 import { userModel } from "../user/user-schema.js";
+import { syllabusPlansModel } from "./syllabus-plans.js";
+import { plans } from "../../utils/configs/plans/index.js";
+import { chaptersPlansModel } from "./chapters-plans.js";
 
 class CourseService {
   async find({
@@ -143,15 +146,46 @@ class CourseService {
   async create({ createdBy, body, user }) {
     await connectRedis();
     await client.del(`courses:*`);
+    const findCourseWithName = await courseModel.findOne({
+      title: body.title,
+      createdBy,
+    });
+
+    if (findCourseWithName) {
+      return {
+        error: true,
+        status: 403,
+        message: "Course already exist with same title!",
+      };
+    }
+
     let extractLimit = user?.institute_sub_details?.planLimit || 0;
 
-    if (extractLimit >= 1) {
+    if (extractLimit !== "unlimited" && extractLimit >= 1) {
       extractLimit -= 1;
       await userModel.findByIdAndUpdate(user._id, {
         $set: { "institute_sub_details.planLimit": extractLimit },
       });
     }
-    return await courseModel.create({ ...body, createdBy });
+    const courseCreate = await courseModel.create({ ...body, createdBy });
+    const currentPlan = user.institute_sub_details.plan;
+    const createdObj = {
+      courseId: courseCreate._id,
+      instituteId: createdBy,
+    };
+
+    await Promise.all([
+      syllabusPlansModel.create({
+        ...createdObj,
+        syllabusLimit: plans[currentPlan].syllabus,
+      }),
+      chaptersPlansModel.create({
+        ...createdObj,
+        chaptersLimit: plans[currentPlan].chapters,
+      }),
+    ]);
+
+    return courseCreate;
   }
   // ** END ** /
 

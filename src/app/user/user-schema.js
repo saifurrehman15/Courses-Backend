@@ -25,14 +25,18 @@ const UserSchema = new Schema(
       paymentStatus: {
         type: String,
         default: "Unpaid",
-        enum: ["Unpaid", "Active", "Expired"],
+        enum: ["Unpaid", "Paid", "Expired"],
       },
-      planLimit: { type: Number, default: 3 },
+      planLimit: {
+        type: Schema.Types.Mixed,
+        default: 3,
+      },
       stripePaymentId: String,
       stripeSessionId: String,
-      planExpiresAt: Date,
+      orderId: String,
+      billingCycle: { type: String, default: "monthly" },
+      purchaseTime: { type: Date, default: Date.now },
     },
-
   },
   { timestamps: true }
 );
