@@ -123,6 +123,13 @@ class CoursesController {
         body: value,
         user: req.user,
       });
+      
+      if (course.error) {
+        return sendResponse(res, course.status, {
+          error: true,
+          message: course.message,
+        });
+      }
 
       if (!course) {
         return sendResponse(res, 403, {

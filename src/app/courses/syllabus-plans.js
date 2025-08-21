@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const SyllabusSchema = new Schema({
   courseId: { type: mongoose.Types.ObjectId, ref: "courses", required: true },
-  syllabusLimit: { type: Number, default: 3 },
+  syllabusLimit: { type: Schema.Types.Mixed, default: 3 },
   instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
 });
 

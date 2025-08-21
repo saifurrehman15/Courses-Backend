@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const ChaptersSchema = new Schema({
   courseId: { type: mongoose.Types.ObjectId, ref: "courses", required: true },
-  chaptersLimit: { type: Number, default: 5 },
+  chaptersLimit: { type: Schema.Types.Mixed, default: 5 },
   instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
 });
 
