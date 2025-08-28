@@ -21,7 +21,11 @@ class Files {
         type = "raw";
       }
 
-      const uploading = await fileService.upload(req.file, fileName, type);
+      const uploading = await fileService.upload(
+        req.file,
+        fileName + (user?._id || ""),
+        type
+      );
 
       if (!uploading) {
         return sendResponse(res, 403, {
