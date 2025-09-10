@@ -18,9 +18,9 @@ export const validateSchemaUpdate = Joi.object({
   title: Joi.string().trim().min(3).optional(),
   content: Joi.array().items(
     Joi.object({
-      url: Joi.string().uri().optional(),
-      description: Joi.string().trim().optional(),
-      type: Joi.string().valid("video", "pdf", "word").optional(),
+      url: Joi.string().uri().required(),
+      description: Joi.string().trim().required(),
+      type: Joi.string().valid("video", "pdf", "word").required(),
     })
   ).optional()
 });

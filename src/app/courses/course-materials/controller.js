@@ -129,9 +129,12 @@ class CoursesItemsController {
   async update(req, res) {
     try {
       const { error, value } = validateSchemaUpdate.validate(req.body);
+            console.log(error,value);
+
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
+      
       const courseItemId = req.params.id;
       const courseItem = await courseItemModel.findById(courseItemId);
       if (!courseItem) {
