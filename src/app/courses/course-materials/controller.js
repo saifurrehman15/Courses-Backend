@@ -24,8 +24,8 @@ class CoursesItemsController {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
 
-      const courseExists = await itemsCategoryModal.findById(value.category);
-      if (!courseExists) {
+      const subject = await itemsCategoryModal.findById(value.category);
+      if (!subject) {
         return sendResponse(res, 404, {
           error: true,
           message: "Course not found!",
@@ -50,7 +50,7 @@ class CoursesItemsController {
 
       return sendResponse(res, 201, {
         error: false,
-        message: "Course item created successfully!",
+        message: "Course Chapter created successfully!",
         data: { courseItem },
       });
     } catch (err) {

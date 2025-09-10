@@ -51,6 +51,7 @@ router.get(
   [authenticateUser, hasAccess],
   categoryController.findOne
 );
+
 router.put(
   "/courses/category/:id",
   [authenticateUser, hasAccess],

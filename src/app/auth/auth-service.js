@@ -41,9 +41,11 @@ const loginService = async (value) => {
   }
 
   let objWithoutPass = userExist.toObject();
-  delete objWithoutPass.password;
 
-  const { accessToken, refreshToken } = token(objWithoutPass);
+  const { accessToken, refreshToken } = token({
+    _id: objWithoutPass._id,
+    email: objWithoutPass.email,
+  });
 
   return { user: objWithoutPass, accessToken, refreshToken };
 };
@@ -51,7 +53,7 @@ const loginService = async (value) => {
 // google service
 const googleService = async (value) => {
   const userExist = await userModel.findOne({ email: value.emails[0].value });
-console.log(userExist,value.emails[0].value);
+  console.log(userExist, value.emails[0].value);
 
   let obj = {
     email: value.emails[0].value,

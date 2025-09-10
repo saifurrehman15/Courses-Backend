@@ -14,7 +14,7 @@ const hasAccess = async (req, res, next) => {
   const isInstituteOwner = user?.owner;
   const isAdmin = user?.role === "admin";
   const isReadOperation = method !== "POST";
-console.log(user,isInstituteOwner);
+// console.log(user,isInstituteOwner);
 
   try {
     const institute = await instituteService.findOne({ _id: isInstituteOwner });
@@ -48,12 +48,14 @@ console.log(user,isInstituteOwner);
       const query = {
         $or: [{ _id: paramId }, { course: paramId }, { institute: paramId }],
       };
+      console.log(req.params.id,query,req.body.course);
+      
       const category = await categoryServices.findOne(query);
       let categoryHasCourse = await courseModel.findOne({
         _id: new mongoose.Types.ObjectId(req.body.course),
       });
 
-      if (!categoryHasCourse) {
+      if (!categoryHasCourse && !isReadOperation) {
         return sendResponse(res, 404, {
           error: true,
           message: "Their is no course available on that id!",
@@ -66,7 +68,7 @@ console.log(user,isInstituteOwner);
           message: "Course category not found!",
         });
       }
-      console.log("instituteOwner",isInstituteOwner);
+      // console.log("instituteOwner",isInstituteOwner);
 
       const hasAccess = isReadOperation
         ? category?.institute?.toString() === isInstituteOwner?.toString() ||

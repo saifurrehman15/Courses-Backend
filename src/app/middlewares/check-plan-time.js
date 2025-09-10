@@ -23,7 +23,6 @@ const checkPlanTime = async (req, res, next) => {
     }
 
     if (expiryDate && dayjs().isAfter(expiryDate)) {
-      console.log("hjdsn");
 
       await userModel.findByIdAndUpdate(user._id, {
         $unset: {

@@ -6,6 +6,8 @@ import { plans } from "../../utils/configs/plans/index.js";
 import { userModel } from "./user-schema.js";
 import { ordersService } from "../orders/services.js";
 import { ordersModel } from "../orders/schema.js";
+import * as nodemailer from "nodemailer";
+import { transporter } from "../../utils/configs/node-mailer-config/index.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -235,6 +237,69 @@ class User {
     } catch (err) {
       console.error("Error handling webhook:", err);
       res.status(500).send("Server error");
+    }
+  }
+
+  async contactAdmin(req, res) {
+    try {
+      const { firstName, lastName, email, subject, message } = req.body;
+
+      const validateEmailContent = Joi.object({
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        email: Joi.string().email().required(),
+        subject: Joi.string().required(),
+        message: Joi.string().required(),
+      });
+
+      const { error } = validateEmailContent.validate(req.body);
+
+      if (error) {
+        return sendResponse(res, 400, {
+          error: true,
+          message: error.message,
+        });
+      }
+
+      const info = await transporter.sendMail({
+        from: `"${firstName} ${lastName}" <saifrizwankhan786@gmail.com>`,
+        to: "saifrizwankhan786@gmail.com",
+        replyTo: email,
+        subject: subject,
+        html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+      <h2 style="color: #333; margin-bottom: 10px;">New Contact Form Submission</h2>
+      <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Message:</strong></p>
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #ddd; margin-top: 10px;">
+        ${message}
+      </div>
+      <br/>
+      <p style="color:#888; font-size: 12px;">This message was sent from Edu Master Contact Form</p>
+    </div>
+  `,
+      });
+
+      if (!info) {
+        return sendResponse(res, 500, {
+          error: true,
+          message: "Error sending email!",
+        });
+      }
+
+      return sendResponse(res, 200, {
+        error: false,
+        message: "Email sent successfully!",
+        data: info,
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      return sendResponse(res, 500, {
+        error: true,
+        message: error.message || "Internal server error!",
+      });
     }
   }
 }

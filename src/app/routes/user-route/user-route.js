@@ -5,10 +5,22 @@ import checkPlanTime from "../../middlewares/check-plan-time.js";
 
 const router = express.Router();
 
-router.get("/single-user", [authenticateUser,checkPlanTime], UserController.findSingleUser);
+router.get(
+  "/single-user",
+  [authenticateUser, checkPlanTime],
+  UserController.findSingleUser
+);
 router.put("/update-user", [authenticateUser], UserController.updateUser);
-router.post("/create-payment-intent", authenticateUser, UserController.planUpdate);
-router.get("/get-payment-intent/:id", authenticateUser, UserController.getPaymentDetails);
-
+router.post(
+  "/create-payment-intent",
+  authenticateUser,
+  UserController.planUpdate
+);
+router.get(
+  "/get-payment-intent/:id",
+  authenticateUser,
+  UserController.getPaymentDetails
+);
+router.post("/contact-admin", UserController.contactAdmin);
 
 export default router;

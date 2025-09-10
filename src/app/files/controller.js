@@ -7,7 +7,7 @@ class Files {
     try {
       const { user, query } = req;
       const { isProfile = false } = query;
-      // console.log("file from frontend!", req.file);
+      console.log("file from frontend!", req.file);
       const { file } = req;
       const fileName = file.originalname.split(".")[0];
       const mimetype = file.mimetype;
