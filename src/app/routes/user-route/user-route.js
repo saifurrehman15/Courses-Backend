@@ -16,11 +16,14 @@ router.post(
   authenticateUser,
   UserController.planUpdate
 );
+router.post("/buy-course", authenticateUser, UserController.buyCourse);
 router.get(
   "/get-payment-intent/:id",
   authenticateUser,
   UserController.getPaymentDetails
 );
 router.post("/contact-admin", UserController.contactAdmin);
+router.get("/get-orders/:id", [authenticateUser], UserController.getOrders);
+router.get("/get-orders", [authenticateUser], UserController.getOrders);
 
 export default router;

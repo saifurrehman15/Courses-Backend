@@ -8,6 +8,7 @@ import { ordersService } from "../orders/services.js";
 import { ordersModel } from "../orders/schema.js";
 import * as nodemailer from "nodemailer";
 import { transporter } from "../../utils/configs/node-mailer-config/index.js";
+import mongoose from "mongoose";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -135,9 +136,11 @@ class User {
         currency: currency,
         receipt_email: customerDetails.email,
         metadata: {
+          type: "institute",
           billing_cycle: billingCycle,
           plan: plan,
           userId: user._id.toString(),
+          instituteId: user.owner.toString(),
           customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`,
           customer_email: customerDetails.email,
         },
@@ -149,6 +152,37 @@ class User {
       });
     } catch (error) {
       console.error("Error creating payment intent:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async buyCourse(req, res) {
+    try {
+      const { body, user } = req;
+      const { amount, currency, courseId, customerDetails, billingCycle } =
+        body;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        receipt_email: customerDetails.email,
+        metadata: {
+          type: "course",
+          billingCycle,
+          courseId: courseId,
+          userId: user._id.toString(),
+          instituteId: user.owner.toString(),
+          customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`,
+          customer_email: customerDetails.email,
+        },
+      });
+
+      return sendResponse(res, 200, {
+        data: paymentIntent.client_secret,
+        message: "Course payment intent created successfully!",
+      });
+    } catch (error) {
+      console.error("Error creating course payment intent:", error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -176,14 +210,22 @@ class User {
           let order = await ordersModel.findOne({
             paymentIntentId: paymentIntent.id,
           });
-          const orderDocs = await ordersModel.countDocuments();
+          const orderDocs = await ordersModel.countDocuments({
+            instituteId: paymentIntent.metadata.instituteId,
+          });
           const orderId = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${orderDocs + 1}`;
 
           if (!order) {
+            const orderDocs = await ordersModel.countDocuments({
+              instituteId: paymentIntent.metadata.instituteId,
+            });
+            const orderId = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${orderDocs + 1}`;
             order = await ordersService.createOrder({
               userId: paymentIntent.metadata.userId || null,
+              instituteId: paymentIntent.metadata.instituteId || null,
               paymentIntentId: paymentIntent.id,
-              planBuy: paymentIntent.metadata.plan || "Unknown Plan",
+              planBuy:
+                paymentIntent.metadata.plan || paymentIntent.metadata.courseId,
               chargeId: paymentIntent.latest_charge,
               amount: paymentIntent.amount,
               orderId,
@@ -205,17 +247,36 @@ class User {
             );
           }
 
-          if (paymentIntent.metadata.userId) {
-            const userId = paymentIntent.metadata.userId;
-            await userModel.findByIdAndUpdate(userId, {
-              $set: {
-                "institute_sub_details.paymentStatus": "Paid",
-                "institute_sub_details.plan": paymentIntent.metadata.plan || "",
-                "institute_sub_details.planLimit":
-                  plans[paymentIntent.metadata.plan]?.planLimit || 0,
-                "institute_sub_details.orderId": orderId,
+          if (paymentIntent.metadata.type === "course") {
+            const objAdd = {
+              courseId: new mongoose.Types.ObjectId(
+                paymentIntent.metadata.courseId
+              ),
+              paymentDetails: {
+                billingCycle: paymentIntent.metadata.billingCycle,
+                paymentId: paymentIntent.id,
+              },
+            };
+
+            await userModel.findByIdAndUpdate(paymentIntent.metadata.userId, {
+              $push: {
+                purchasedCourses: objAdd,
               },
             });
+          } else {
+            if (paymentIntent.metadata.userId) {
+              const userId = paymentIntent.metadata.userId;
+              await userModel.findByIdAndUpdate(userId, {
+                $set: {
+                  "institute_sub_details.paymentStatus": "Paid",
+                  "institute_sub_details.plan":
+                    paymentIntent.metadata.plan || "",
+                  "institute_sub_details.planLimit":
+                    plans[paymentIntent.metadata.plan]?.planLimit || 0,
+                  "institute_sub_details.orderId": orderId,
+                },
+              });
+            }
           }
 
           break;
@@ -296,6 +357,37 @@ class User {
       });
     } catch (error) {
       console.error("Error sending email:", error);
+      return sendResponse(res, 500, {
+        error: true,
+        message: error.message || "Internal server error!",
+      });
+    }
+  }
+
+  async getOrders(req, res) {
+    try {
+      const { user } = req;
+      const { query } = req;
+      console.log(query);
+
+      const findOrder = await ordersService.findOrder({
+        $or: [{ userId: user._id }, { instituteId: req.params.id }],
+      });
+
+      if (!findOrder.length) {
+        return sendResponse(res, 404, {
+          error: true,
+          message: "No orders found!",
+        });
+      }
+
+      return sendResponse(res, 200, {
+        error: false,
+        message: "Orders found successfully!",
+        data: findOrder,
+      });
+    } catch (error) {
+      console.error("Error fetching orders:", error);
       return sendResponse(res, 500, {
         error: true,
         message: error.message || "Internal server error!",

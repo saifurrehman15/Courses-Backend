@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const CourseItemSchema = new Schema(
   {
     title: { type: String, required: true },
+    description: { type: String, required: true },
     category: {
       type: mongoose.Types.ObjectId,
       ref: "course_items",
@@ -22,6 +23,7 @@ const CourseItemSchema = new Schema(
     },
     content: [
       {
+        title: { type: String, required: true },
         url: { type: String, required: true },
         description: { type: String, required: true },
         type: {

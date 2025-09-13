@@ -1,8 +1,8 @@
 import sendResponse from "../helper/response-sender.js";
 import { instituteService } from "../institute/services.js";
 import { studentServices } from "../student/services.js";
-import { categoryServices } from "../courses/course-items/services.js";
-import { courseItemModel } from "../courses/course-materials/schema.js";
+import { categoryServices } from "../courses/course-syllabus/services.js";
+import { courseItemModel } from "../courses/course-chapters/schema.js";
 import { courseService } from "../courses/services.js";
 import { courseModel } from "../courses/schema.js";
 import mongoose from "mongoose";

@@ -15,12 +15,7 @@ const checkPlanTime = async (req, res, next) => {
     }
 
     // expiry calculate
-    let expiryDate;
-    if (billingCycle === "monthly") {
-      expiryDate = dayjs(purchaseTime).add(1, "month");
-    } else if (billingCycle === "yearly") {
-      expiryDate = dayjs(purchaseTime).add(1, "year");
-    }
+z
 
     if (expiryDate && dayjs().isAfter(expiryDate)) {
 
@@ -40,10 +35,10 @@ const checkPlanTime = async (req, res, next) => {
       });
     }
 
-    next();
+   return next();
   } catch (err) {
     console.error("Error in checkPlanTime middleware:", err);
-    next();
+   return next();
   }
 };
 

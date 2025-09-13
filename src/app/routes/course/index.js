@@ -2,11 +2,11 @@ import express from "express";
 import { coursesController } from "../../courses/controller.js";
 import authenticateUser from "../../middlewares/authenticate-user.js";
 import hasAccess from "../../middlewares/has-access.js";
-
-import { coursesItemsController } from "../../courses/course-materials/controller.js";
-import { categoryController } from "../../courses/course-items/controller.js";
 import courseListController from "../../courses/categories/controller.js";
 import { planTrack } from "../../middlewares/plan-track.js";
+import { coursesItemsController } from "../../courses/course-chapters/controller.js";
+import { categoryController } from "../../courses/course-syllabus/controller.js";
+import checkUserPlan from "../../middlewares/check-user-plan.js";
 
 const router = express.Router();
 
@@ -18,7 +18,15 @@ router.post(
   coursesController.create
 );
 router.get("/courses", coursesController.index);
-router.get("/courses/:id", coursesController.show);
+router.get(
+  "/courses/:id",
+  [authenticateUser, checkUserPlan],
+  coursesController.show
+);
+router.get(
+  "/courses-single/:id",
+  coursesController.show
+);
 router.get(
   "/institute-courses/:id",
   authenticateUser,
@@ -38,7 +46,7 @@ router.delete(
 // courses categories routes
 router.post(
   "/courses/category",
-  [authenticateUser, hasAccess],
+  [authenticateUser, hasAccess, planTrack],
   categoryController.create
 );
 router.get(
@@ -63,7 +71,7 @@ router.delete(
   categoryController.delete
 );
 
-// category
+// ** CATEGORY ROUTES ** //
 router.post(
   "/create-category",
   [authenticateUser, hasAccess],
@@ -80,11 +88,12 @@ router.delete(
   [authenticateUser, hasAccess],
   courseListController.delete
 );
+// ** END CATEGORY ROUTES ** //
 
-// courses items routes
+// ** CHAPTERS ROUTES ** //
 router.post(
   "/courses/items",
-  [authenticateUser, hasAccess],
+  [authenticateUser, hasAccess, planTrack],
   coursesItemsController.create
 );
 router.get("/courses/items/:id", coursesItemsController.index);
@@ -99,5 +108,6 @@ router.delete(
   [authenticateUser, hasAccess],
   coursesItemsController.delete
 );
+// ** END CHAPTERS ROUTES ** //
 
 export default router;

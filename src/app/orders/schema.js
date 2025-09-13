@@ -5,6 +5,11 @@ const { Schema } = mongoose;
 const OrdersSchema = new Schema(
   {
     userId: { type: mongoose.Types.ObjectId, ref: "users", required: true },
+    instituteId: {
+      type: mongoose.Types.ObjectId,
+      ref: "institutes",
+      required: true,
+    },
     planBuy: { type: String, required: true },
     paymentIntentId: { type: String, required: true },
     chargeId: { type: String },

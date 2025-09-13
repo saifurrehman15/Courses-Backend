@@ -1,9 +1,9 @@
 export const plans = {
   pro: {
     title: "Pro",
-    planLimit: 10,
-    syllabus: 10,
-    chapters: 30,
+    planLimit: 5,
+    syllabus: 6,
+    chapters: 10,
   },
   enterprise: {
     title: "Enterprise",

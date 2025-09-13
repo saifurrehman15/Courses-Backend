@@ -55,12 +55,12 @@ class CourseService {
     search=${search || ""}
     &category=${category || ""}&courseType=${courseType || ""}`;
 
-    // const cachedData = await client.get(cacheKey);
+    const cachedData = await client.get(cacheKey);
 
-    // if (cachedData) {
-    //   console.log("Data served from Redis cache");
-    //   return JSON.parse(cachedData);
-    // }
+    if (cachedData) {
+      console.log("Data served from Redis cache");
+      return JSON.parse(cachedData);
+    }
 
     const result = await courseModel.aggregate(
       dbQueries.paginationQuery(
