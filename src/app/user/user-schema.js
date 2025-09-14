@@ -15,7 +15,20 @@ const UserSchema = new Schema(
       duration: String,
       instituteId: { type: mongoose.Types.ObjectId, ref: "institutes" },
     },
-
+    purchasedCourses: [
+      {
+        courseId: {
+          type: mongoose.Types.ObjectId,
+          ref: "courses",
+          required: true,
+        },
+        paymentDetails: {
+          paymentId: String,
+          billingCycle: { type: String, required: true },
+          purchaseTime: { type: Date, default: Date.now },
+        },
+      },
+    ],
     institute_sub_details: {
       plan: {
         type: String,

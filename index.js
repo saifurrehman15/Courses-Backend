@@ -12,7 +12,6 @@ import passport from "./src/utils/passport-utils/passport-util.js";
 import session from "express-session";
 import cron from "node-cron";
 import { client } from "./src/utils/configs/redis/index.js";
-import Stripe from "stripe";
 import { UserController } from "./src/app/user/user-controller.js";
 const app = express();
 const port = process.env.PORT;

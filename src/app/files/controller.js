@@ -7,7 +7,7 @@ class Files {
     try {
       const { user, query } = req;
       const { isProfile = false } = query;
-      // console.log("file from frontend!", req.file);
+      console.log("file from frontend!", req.file);
       const { file } = req;
       const fileName = file.originalname.split(".")[0];
       const mimetype = file.mimetype;
@@ -21,7 +21,11 @@ class Files {
         type = "raw";
       }
 
-      const uploading = await fileService.upload(req.file, fileName, type);
+      const uploading = await fileService.upload(
+        req.file,
+        fileName + (user?._id || ""),
+        type
+      );
 
       if (!uploading) {
         return sendResponse(res, 403, {

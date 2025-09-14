@@ -18,22 +18,25 @@ const signUp = async (req, res) => {
     const { error, value } = validateSchema.validate(req.body);
 
     if (error) {
-      sendResponse(res, 400, { error: true, message: error.message });
+      return sendResponse(res, 400, { error: true, message: error.message });
     }
 
     const obj = await registerService(value);
 
     if (!obj) {
-      sendResponse(res, 403, { error: true, message: "User already exist!" });
+      return sendResponse(res, 403, {
+        error: true,
+        message: "User already exist!",
+      });
     }
 
-    sendResponse(res, 201, {
+    return sendResponse(res, 201, {
       error: false,
       message: "User registered successfully!",
       data: { ...obj },
     });
   } catch (error) {
-    sendResponse(res, 500, {
+    return sendResponse(res, 500, {
       error: true,
       message: error || "Internal server error",
     });
@@ -43,22 +46,21 @@ const signUp = async (req, res) => {
 // login controller
 const login = async (req, res) => {
   const { error, value } = loginSchema.validate(req.body);
-console.log(error,req.body);
 
   if (error) {
-    sendResponse(res, 400, { error: true, message: error.message });
+    return sendResponse(res, 400, { error: true, message: error.message });
   }
 
   const loginServiceGet = await loginService(value);
 
   if (loginServiceGet.error) {
-    sendResponse(res, loginServiceGet.status, {
+    return sendResponse(res, loginServiceGet.status, {
       error: true,
       message: loginServiceGet.error,
     });
   }
 
-  sendResponse(res, 200, {
+  return sendResponse(res, 200, {
     error: false,
     message: "The user login successfully!",
     data: { ...loginServiceGet },

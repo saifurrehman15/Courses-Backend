@@ -41,8 +41,10 @@ class Category {
 
   async findAll(req, res) {
     try {
+      console.log("lorem",req.params);
+
       const categories = await categoryServices.findAll(req.query, req.params);
-      console.log("hy", categories[0]);
+console.log(categories,categories[0].category);
 
       if (!categories || categories.length == 0) {
         return sendResponse(res, 404, {
@@ -98,26 +100,30 @@ class Category {
   }
 
   async update(req, res) {
-    const { error, value } = updateCategory.validate(req.body);
+    try {
+      const { error, value } = updateCategory.validate(req.body);
 
-    if (error) {
-      return sendResponse(res, 400, { error: true, message: error.message });
-    }
+      if (error) {
+        return sendResponse(res, 400, { error: true, message: error.message });
+      }
 
-    const updated = await categoryServices.update(req.params.id, value);
+      const updated = await categoryServices.update(req.params.id, value);
 
-    if (!updated) {
-      return sendResponse(res, 403, {
-        error: true,
-        message: "Failed to update caategory!",
+      if (!updated) {
+        return sendResponse(res, 403, {
+          error: true,
+          message: "Failed to update caategory!",
+        });
+      }
+
+      return sendResponse(res, 200, {
+        error: false,
+        message: "Category updated successfully!",
+        data: { categories: updated },
       });
+    } catch (error) {
+      console.log(error);
     }
-
-    return sendResponse(res, 200, {
-      error: false,
-      message: "Category updated successfully!",
-      data: { categories: updated },
-    });
   }
 
   async delete(req, res) {

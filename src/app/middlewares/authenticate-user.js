@@ -31,7 +31,7 @@ const authenticateUser = async (req, res, next) => {
 
     next();
   } catch (error) {
-    sendResponse(res, 500, {
+   return sendResponse(res, 500, {
       error: true,
       message: error || "Internal server error!",
     });

@@ -1,6 +1,6 @@
 import sendResponse from "../../helper/response-sender.js";
 import { chaptersPlansModel } from "../chapters-plans.js";
-import { itemsCategoryModal } from "../course-items/schema.js";
+import { itemsCategoryModal } from "../course-syllabus/schema.js";
 import { courseItemModel } from "./schema.js";
 import { courseItemsService } from "./services.js";
 
@@ -24,8 +24,8 @@ class CoursesItemsController {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
 
-      const courseExists = await itemsCategoryModal.findById(value.category);
-      if (!courseExists) {
+      const subject = await itemsCategoryModal.findById(value.category);
+      if (!subject) {
         return sendResponse(res, 404, {
           error: true,
           message: "Course not found!",
@@ -50,7 +50,7 @@ class CoursesItemsController {
 
       return sendResponse(res, 201, {
         error: false,
-        message: "Course item created successfully!",
+        message: "Course Chapter created successfully!",
         data: { courseItem },
       });
     } catch (err) {
@@ -129,9 +129,12 @@ class CoursesItemsController {
   async update(req, res) {
     try {
       const { error, value } = validateSchemaUpdate.validate(req.body);
+            console.log(error,value);
+
       if (error) {
         return sendResponse(res, 400, { error: true, message: error.message });
       }
+      
       const courseItemId = req.params.id;
       const courseItem = await courseItemModel.findById(courseItemId);
       if (!courseItem) {

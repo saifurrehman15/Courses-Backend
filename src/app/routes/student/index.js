@@ -17,11 +17,11 @@ router.get(
   authenticateUser,
   studentController.findOne
 );
-// router.get(
-//   "/student-applications/:id",
-//   authenticateUser,
-//   studentController.findOwnApplication
-// );
+router.get(
+  "/student-applications/:id",
+  authenticateUser,
+  studentController.findOwnApplication
+);
 router.put(
   "/update-application/:id",
   [authenticateUser, hasAccess],

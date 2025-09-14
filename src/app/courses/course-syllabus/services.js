@@ -5,7 +5,6 @@ import { syllabusPlansModel } from "../syllabus-plans.js";
 
 class CategoryServices {
   async create({ value, institute, limitCount }) {
-   
     const findCategory = await itemsCategoryModal.findOne({
       title: value.title,
     });
@@ -35,21 +34,18 @@ class CategoryServices {
     const { search = "", limits = 5, page = 1 } = queries;
     let limitsInNumber = Number(limits);
     let skipsOffset = (page - 1) * limitsInNumber;
-    console.log(skipsOffset);
 
     let query = {};
-    console.log("search", queries.search);
 
     if (search) {
       query = {
         title: { $regex: queries.search, $options: "i" },
       };
     }
-    console.log(query);
 
     query.$or = [
-      { course: new mongoose.Types.ObjectId(param.id) },
       { institute: new mongoose.Types.ObjectId(param.id) },
+      { course: new mongoose.Types.ObjectId(param.id) },
     ];
 
     console.log(query);
@@ -62,20 +58,23 @@ class CategoryServices {
         page,
         "courses",
         true,
-        "course"
+        "course",
+        "after"
       )
     );
-
-    console.log("result", datas);
 
     return datas;
   }
 
   async findOne(query) {
-    return await itemsCategoryModal.findOne(query);
+    return await itemsCategoryModal
+      .findOne(query)
+      .populate("course", "title _id");
   }
 
   async update(id, value) {
+    console.log(id,value);
+    
     return itemsCategoryModal.findByIdAndUpdate(id, value, { $new: true });
   }
 
