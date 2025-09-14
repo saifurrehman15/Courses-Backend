@@ -91,7 +91,7 @@ class User {
   async getPaymentDetails(req, res) {
     try {
       const { id } = req.params;
-      console.log(id);
+      console.log("id",id);
 
       const paymentIntent = await stripe.paymentIntents.retrieve(id, {
         expand: ["charges"],
@@ -152,6 +152,8 @@ class User {
   }
 
   async handleWebhook(req, res) {
+    console.log("sdsd");
+    
     const sig = req.headers["stripe-signature"];
     let event;
 
@@ -159,12 +161,13 @@ class User {
       event = stripe.webhooks.constructEvent(
         req.body,
         sig,
-        "whsec_70c7121ad6bc097b1dd003016584b18d62e20f4edafa4768b559b090d65c2def"
+        "whsec_4d025bdded97d485a32ec5b9ee0756390647b93ff76a042f71564b816860cefc"
       );
     } catch (err) {
       console.error("Webhook signature verification failed:", err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+console.log("paymentIntent");
 
     try {
       switch (event.type) {
@@ -220,6 +223,8 @@ class User {
 
         case "payment_intent.payment_failed":
           const failedIntent = event.data.object;
+          console.log("jiikjioj");
+          
           await ordersModel.findOneAndUpdate(
             { paymentIntentId: failedIntent.id },
             { $set: { paymentId: failedIntent.id, status: "failed" } },

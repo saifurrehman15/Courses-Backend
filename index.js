@@ -59,7 +59,7 @@ cron.schedule("0 2 * * *", async () => {
   console.log("Redis cache cleared at 2 AM");
 });
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.send("Server is running on port " + port);
 });
 
