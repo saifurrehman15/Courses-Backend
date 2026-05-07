@@ -23,7 +23,7 @@ class CourseService {
     level,
     courseType,
   }) {
-    await connectRedis();
+    // await connectRedis();
 
     const skip = (page - 1) * limit;
     let query = {};
@@ -51,16 +51,16 @@ class CourseService {
 
     console.log("query", query);
 
-    const cacheKey = `courses:page=${page}&limit=${limit}&
-    search=${search || ""}
-    &category=${category || ""}&courseType=${courseType || ""}`;
+    // const cacheKey = `courses:page=${page}&limit=${limit}&
+    // search=${search || ""}
+    // &category=${category || ""}&courseType=${courseType || ""}`;
 
-    const cachedData = await client.get(cacheKey);
+    // const cachedData = await client.get(cacheKey);
 
-    if (cachedData) {
-      console.log("Data served from Redis cache");
-      return JSON.parse(cachedData);
-    }
+    // if (cachedData) {
+    //   console.log("Data served from Redis cache");
+    //   return JSON.parse(cachedData);
+    // }
 
     const result = await courseModel.aggregate(
       dbQueries.paginationQuery(
@@ -77,7 +77,7 @@ class CourseService {
       )
     );
 
-    await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
+    // await client.set(cacheKey, JSON.stringify(result), "EX", 60 * 60 * 24);
 
     return result;
   }
