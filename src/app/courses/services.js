@@ -144,7 +144,7 @@ class CourseService {
 
   // ** CREATE COURSES ** /
   async create({ createdBy, body, user }) {
-    await connectRedis();
+    // await connectRedis();
     await client.del(`courses:*`);
     const findCourseWithName = await courseModel.findOne({
       title: body.title,

@@ -34,7 +34,7 @@ class InstituteServices {
   }
 
   async findAll(queries) {
-    await connectRedis();
+    // await connectRedis();
 
     const { search, limits = 5, page = 1 } = queries;
     const limitsInNumber = Number(limits);
@@ -50,13 +50,13 @@ class InstituteServices {
       };
     }
 
-    const cache = `institutes:page=${page}&&limit=${limitsInNumber}&&skip=${skipsOffset}&&search=${search || ""}`;
-    const data = await client.get(cache);
+    // const cache = `institutes:page=${page}&&limit=${limitsInNumber}&&skip=${skipsOffset}&&search=${search || ""}`;
+    // const data = await client.get(cache);
 
-    if (data) {
+    // if (data) {
 
-      return JSON.parse(data);
-    }
+    //   return JSON.parse(data);
+    // }
 
     const result = await instituteModal.aggregate(
       dbQueries.paginationQuery(
@@ -101,7 +101,7 @@ class InstituteServices {
 
       result[0].institutes = updatedInstitutes;
     }
-    await client.set(cache, JSON.stringify(result), "EX", 60 * 60 * 24);
+    // await client.set(cache, JSON.stringify(result), "EX", 60 * 60 * 24);
     return result;
   }
 

@@ -12,5 +12,4 @@ const loginSchema = Joi.object({
   password: Joi.string().length(6).required(),
 });
 
-
 export { validateSchema, loginSchema };
