@@ -204,7 +204,7 @@ class User {
         event = stripe.webhooks.constructEvent(
           req.body,
           sig,
-          'whsec_4d025bdded97d485a32ec5b9ee0756390647b93ff76a042f71564b816860cefc'
+          process.env.WEBHOOK_SECRET
         );
         console.log("Webhook verified successfully:", event.type);
       } catch (err) {
