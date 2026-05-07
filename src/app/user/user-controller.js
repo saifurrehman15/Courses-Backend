@@ -135,7 +135,7 @@ class User {
         amount: amount,
         currency: 'usd',
         receipt_email: customerDetails.email,
-        payment_method_types: ["card"], 
+        payment_method_types: ["card"],
         metadata: {
           type: "institute",
           billing_cycle: billingCycle,
@@ -165,7 +165,10 @@ class User {
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
-        currency,
+        currency: "usd",
+        automatic_payment_methods: {
+          enabled: true,
+        },
         receipt_email: customerDetails.email,
         metadata: {
           type: "course",
