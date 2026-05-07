@@ -94,7 +94,7 @@ class User {
   async getPaymentDetails(req, res) {
     try {
       const { id } = req.params;
-      console.log("id",id);
+      console.log("id", id);
 
       const paymentIntent = await stripe.paymentIntents.retrieve(id, {
         expand: ["charges"],
@@ -135,6 +135,7 @@ class User {
         amount: amount,
         currency: currency,
         receipt_email: customerDetails.email,
+        payment_method_types: ["card"], 
         metadata: {
           type: "institute",
           billing_cycle: billingCycle,
@@ -189,7 +190,7 @@ class User {
 
   async handleWebhook(req, res) {
     console.log("sdsd");
-    
+
     const sig = req.headers["stripe-signature"];
     let event;
 
@@ -203,7 +204,7 @@ class User {
       console.error("Webhook signature verification failed:", err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-console.log("paymentIntent");
+    console.log("paymentIntent");
 
     try {
       switch (event.type) {
@@ -287,7 +288,7 @@ console.log("paymentIntent");
         case "payment_intent.payment_failed":
           const failedIntent = event.data.object;
           console.log("jiikjioj");
-          
+
           await ordersModel.findOneAndUpdate(
             { paymentIntentId: failedIntent.id },
             { $set: { paymentId: failedIntent.id, status: "failed" } },
