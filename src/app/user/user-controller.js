@@ -133,7 +133,7 @@ class User {
       // Create a PaymentIntent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
-        currency: currency,
+        currency: 'usd',
         receipt_email: customerDetails.email,
         payment_method_types: ["card"], 
         metadata: {
