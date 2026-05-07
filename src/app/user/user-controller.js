@@ -133,9 +133,8 @@ class User {
       // Create a PaymentIntent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
-        currency: 'usd',
+        currency: currency,
         receipt_email: customerDetails.email,
-        payment_method_types: ["card"],
         metadata: {
           type: "institute",
           billing_cycle: billingCycle,
@@ -165,10 +164,7 @@ class User {
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
-        currency: "usd",
-        automatic_payment_methods: {
-          enabled: true,
-        },
+        currency,
         receipt_email: customerDetails.email,
         metadata: {
           type: "course",
@@ -192,47 +188,55 @@ class User {
   }
 
   async handleWebhook(req, res) {
-    console.log("sdsd");
-
-    const sig = req.headers["stripe-signature"];
-    let event;
-
     try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        "whsec_4d025bdded97d485a32ec5b9ee0756390647b93ff76a042f71564b816860cefc"
-      );
-    } catch (err) {
-      console.error("Webhook signature verification failed:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-    console.log("paymentIntent");
+      console.log("Webhook received");
 
-    try {
+      const sig = req.headers["stripe-signature"];
+
+      if (!sig) {
+        console.error("No stripe-signature header found");
+        return res.status(400).send("Webhook Error: No signature header");
+      }
+
+      let event;
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          sig,
+          'whsec_4d025bdded97d485a32ec5b9ee0756390647b93ff76a042f71564b816860cefc'
+        );
+        console.log("Webhook verified successfully:", event.type);
+      } catch (err) {
+        console.error("Webhook signature verification failed:", err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      // Process the event only if verification succeeded
+      console.log("Processing event type:", event.type);
+
       switch (event.type) {
         case "payment_intent.succeeded":
           const paymentIntent = event.data.object;
+          console.log("Payment intent succeeded:", paymentIntent.id);
+          console.log("Metadata:", paymentIntent.metadata);
 
+          // Check if order already exists
           let order = await ordersModel.findOne({
             paymentIntentId: paymentIntent.id,
           });
+
           const orderDocs = await ordersModel.countDocuments({
             instituteId: paymentIntent.metadata.instituteId,
           });
           const orderId = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${orderDocs + 1}`;
 
           if (!order) {
-            const orderDocs = await ordersModel.countDocuments({
-              instituteId: paymentIntent.metadata.instituteId,
-            });
-            const orderId = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${orderDocs + 1}`;
             order = await ordersService.createOrder({
               userId: paymentIntent.metadata.userId || null,
               instituteId: paymentIntent.metadata.instituteId || null,
               paymentIntentId: paymentIntent.id,
-              planBuy:
-                paymentIntent.metadata.plan || paymentIntent.metadata.courseId,
+              planBuy: paymentIntent.metadata.plan || paymentIntent.metadata.courseId,
               chargeId: paymentIntent.latest_charge,
               amount: paymentIntent.amount,
               orderId,
@@ -240,6 +244,7 @@ class User {
               receiptEmail: paymentIntent.receipt_email,
               status: "succeeded",
             });
+            console.log("New order created:", orderId);
           } else {
             await ordersModel.findOneAndUpdate(
               { paymentIntentId: paymentIntent.id },
@@ -252,13 +257,15 @@ class User {
               },
               { new: true }
             );
+            console.log("Order updated:", paymentIntent.id);
           }
 
+          // Handle course purchase
           if (paymentIntent.metadata.type === "course") {
+            console.log("Processing course purchase...");
+
             const objAdd = {
-              courseId: new mongoose.Types.ObjectId(
-                paymentIntent.metadata.courseId
-              ),
+              courseId: new mongoose.Types.ObjectId(paymentIntent.metadata.courseId),
               paymentDetails: {
                 billingCycle: paymentIntent.metadata.billingCycle,
                 paymentId: paymentIntent.id,
@@ -270,27 +277,28 @@ class User {
                 purchasedCourses: objAdd,
               },
             });
-          } else {
+            console.log('COURSES-PURCHASED', objAdd);
+          }
+          // Handle institute subscription
+          else if (paymentIntent.metadata.type === "institute") {
             if (paymentIntent.metadata.userId) {
               const userId = paymentIntent.metadata.userId;
               await userModel.findByIdAndUpdate(userId, {
                 $set: {
                   "institute_sub_details.paymentStatus": "Paid",
-                  "institute_sub_details.plan":
-                    paymentIntent.metadata.plan || "",
-                  "institute_sub_details.planLimit":
-                    plans[paymentIntent.metadata.plan]?.planLimit || 0,
+                  "institute_sub_details.plan": paymentIntent.metadata.plan || "",
+                  "institute_sub_details.planLimit": plans[paymentIntent.metadata.plan]?.planLimit || 0,
                   "institute_sub_details.orderId": orderId,
                 },
               });
+              console.log("Institute subscription updated for user:", userId);
             }
           }
-
           break;
 
         case "payment_intent.payment_failed":
           const failedIntent = event.data.object;
-          console.log("jiikjioj");
+          console.log("Payment failed:", failedIntent.id);
 
           await ordersModel.findOneAndUpdate(
             { paymentIntentId: failedIntent.id },
@@ -304,6 +312,7 @@ class User {
       }
 
       res.json({ received: true });
+
     } catch (err) {
       console.error("Error handling webhook:", err);
       res.status(500).send("Server error");
